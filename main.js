@@ -36,7 +36,7 @@ $.fn.animateBG = function(x, speed) {
 	this.x = parseInt(pos[0]) || 0;
 	$.Animation( this, {
 			x: x,
-		}, { 
+		}, {
 			duration: speed,
 			queue: false,
 			complete: function() {

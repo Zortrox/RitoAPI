@@ -32,7 +32,7 @@ body {
 	padding: 5px;
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
-	-webkit-user-select: none; /* Chrome/Safari */        
+	-webkit-user-select: none; /* Chrome/Safari */
 	-moz-user-select: none; /* Firefox */
 	-ms-user-select: none; /* IE10+ */
 }
@@ -46,7 +46,7 @@ body {
 	border-radius: 8px;
 	line-height: 64px;
 	text-align: center;
-	-webkit-user-select: none; /* Chrome/Safari */        
+	-webkit-user-select: none; /* Chrome/Safari */
 	-moz-user-select: none; /* Firefox */
 	-ms-user-select: none; /* IE10+ */
 }
