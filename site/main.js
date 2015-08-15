@@ -139,8 +139,7 @@ var loadChampList = function() {
 			'dataType': "json",
 			'success': function (data) {
 				champDATA = data.data;
-				createChampArray();
-				dfd.resolve();
+				createChampArray(dfd);
 			}
 		});
 	} else {
@@ -177,7 +176,7 @@ var loadNewChamp = function(champ) {
 	//spin champion main portrait
 	//blank, gray, or mark out data
 
-	loadImage($("#champ-main-img img"),
+	return loadImage($("#champ-main-img img"),
 		"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + 
 		champ.key + "_0.jpg");
 
@@ -186,7 +185,7 @@ var loadNewChamp = function(champ) {
 		//add data to page and show
 }
 
-var createChampArray = function() {
+var createChampArray = function(dfd) {
 	//add custom grid of champions to elem
 	$("#champ-select-window").hide();
 	$("#champ-select-button").click(function(){
@@ -213,12 +212,14 @@ var createChampArray = function() {
 		$("#champ-icon-id-" + champArray[i]).click(function(){
 			closeChampWindow();
 			var champID = this.id.substr(14);
-			loadNewChamp(champDATA[champID]);
+			loadNewChamp(champDATA[champID]).done(function(){
+				alert("Finished");
+			});
 		});
 	}
 
 	//set first random champion
-	loadNewChamp(champDATA[champArray[
+	var imgProm = loadNewChamp(champDATA[champArray[
 		Math.floor(Math.random() * champArray.length)]]);
 
 	//set scrollbar size and movement
@@ -230,6 +231,9 @@ var createChampArray = function() {
 		$("#champ-scroll .scrollbar-pos").css("top", top);
 	});
 
+	imgProm.done(function() {
+		dfd.resolve();
+	});
 }
 
 var loadNewPage = function() {
