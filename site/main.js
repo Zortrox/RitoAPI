@@ -1,8 +1,17 @@
-var currentPage = 1;
-var mainOpacity = 0.8;
+var pageName = {
+	MAIN : 1,
+	CHAMP : 2,
+	MISC : 3,
+}
+
+var currentPage = pageName.MAIN;
 var canChangePage = true;
 var pageLoaded = true;
 var loadingDef = $.Deferred();
+var dataProms = [];
+var champDATA = null;
+var champArray = [];
+var champScrollbar = null;
 
 $(document).ready(function(){
 	$("#button-page1").click(function(){
@@ -15,19 +24,51 @@ $(document).ready(function(){
 		changePage(100, 3);
 	})
 
-	$("#wrapper").css("opacity", 0.0);
-	$("#main-panel").css("opacity", mainOpacity);
+	var prom1 = loadingDef.promise();
+	loadNewPage();
+
+	champScrollbar = new Scrollbar();
+
+	$("#all-panel").css("opacity", 0.0);
+	$("#side-buttons").css("opacity", 0.0);
+	$("#loading-coin").show();
 	$("#load-bg-img").attr("src", "img/Bilgewater_Slaughter_Docks.jpg").load(function() {
 		$(this).remove();
 		$("#bg-img").css("opacity", 0.0);
 		$("#bg-img").css("background-image", "url('img/Bilgewater_Slaughter_Docks.jpg')");
-		$("#bg-img").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear", complete:
+		$("#loading-coin").hide();
+		var prom2 = $("#bg-img").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear", complete:
 			function() {
 				//show rest of page
-				$("#wrapper").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear"});
-			}})
+				$("#side-buttons").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear"});
+				arrivedAtPage();
+			}}).promise();
+
+		showWhenLoaded(prom1, prom2);
+	});
+
+	$(window).resize(function(){
+		resizeChampPage();
+		if ( $("champ-select-window").css("display") != "none") {
+			champScrollbar.getSizes();
+		}
 	});
 });
+
+var resizeChampPage = function() {
+	var width = $(window).width();
+	var circleWidth = $("#champ-main-img").width();
+	var ratio = width/1215;
+	var offsetX = 960;
+	var offsetY = 245;
+	var zoom = 0.6;
+	$("#champ-main-img").height(circleWidth);
+	$("#champ-main-img img").css({
+		"width": $(window).width() * zoom,
+		"margin-left": -(offsetX * ratio * zoom - circleWidth/2),
+		"margin-top": -(offsetY * ratio * zoom - circleWidth/2),
+	});
+}
 
 $.fn.animateBG = function(x, speed) {
 	//animate background image position to simulate page movement
@@ -40,8 +81,7 @@ $.fn.animateBG = function(x, speed) {
 			duration: speed,
 			queue: false,
 			complete: function() {
-				canChangePage = true;
-				//SHOW COIN HERE
+				arrivedAtPage();
 				dfd.resolve();
 			}
 		}).progress(function(e) {
@@ -51,47 +91,187 @@ $.fn.animateBG = function(x, speed) {
 	return dfd.promise();
 }
 
+var arrivedAtPage = function() {
+	canChangePage = true;
+	$("#loading-coin").show();
+}
+var showWhenLoaded= function(prom1, prom2) {
+	$.when(prom1, prom2).done(function() {
+		showPanel();
+	});
+}
+
 var changePage = function(perc, page) {
 	//wait until page switch ended before going to next page
 	if (page != currentPage && canChangePage) {
 		loadingDef.reject();	//don't show previous page
+		$("#loading-coin").hide();	//cancel current loading anim
+		loadingDef = $.Deferred();
+		var prom1 = loadingDef.promise();
+
 		canChangePage = false;
 		currentPage = page;
-		var prom1 = hidePanel();
+		hidePanel();
 		var prom2 = $("#bg-img").animateBG(perc, 2000);
 
 		//shows panel when everything loads AND
 		//when on correct "page"
-		$.when(prom1, prom2).done(function() {
-			showPanel();
-		});
+		showWhenLoaded(prom1, prom2);
 	}
 }
 
+var loadImage = function(elem, data) {
+	var dfd = $.Deferred();
+	elem.attr("src", data).load(function() {
+		dfd.resolve();
+	});
+	return dfd.promise();
+}
+
+var loadChampList = function() {
+	var dfd = $.Deferred();
+
+	if (champDATA == null) {
+		$.ajax({
+			'async': true,
+			'global': false,
+			'url': "getStatic.php",
+			'dataType': "json",
+			'success': function (data) {
+				champDATA = data.data;
+				createChampArray();
+				dfd.resolve();
+			}
+		});
+	} else {
+		dfd.resolve();
+	}
+
+	return dfd.promise();
+}
+
+function Scrollbar() {
+	var self = this;
+ 	self.totalHeight = 0;
+	self.visibleHeight = 0;
+	self.scrollbarHeight = 0;
+	self.scrollposHeight = 0;
+
+	self.getSizes = function() {
+		self.totalHeight = $("#champ-select-portraits").height() + 5;
+		self.visibleHeight = $("#champ-select-area").height();
+		self.scrollbarHeight = $("#champ-scroll").height();
+		var ratio = self.visibleHeight/self.totalHeight;
+		$("#champ-scroll .scrollbar-pos").height(ratio * self.scrollbarHeight);
+		self.scrollposHeight = $("#champ-scroll .scrollbar-pos").height();
+	};
+}
+
+var closeChampWindow = function() {
+	$("champ-select-area").scrollTop(0);
+	$("#champ-select-window").hide();
+	$("#champ-select-button").show();
+}
+
+var loadNewChamp = function(champ) {
+	//spin champion main portrait
+	//blank, gray, or mark out data
+
+	loadImage($("#champ-main-img img"),
+		"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + 
+		champ.key + "_0.jpg");
+
+	//when all data loaded,
+		//remove spinning wheel
+		//add data to page and show
+}
+
+var createChampArray = function() {
+	//add custom grid of champions to elem
+	$("#champ-select-window").hide();
+	$("#champ-select-button").click(function(){
+		$("#champ-select-window").show();
+		$("#champ-select-button").hide();
+		champScrollbar.getSizes();
+	});
+	$("#champ-select-close").click(function(){
+		closeChampWindow();
+	});
+
+	champArray = [];
+	$.each(champDATA, function(i, champID){
+		champArray.push(champID.id);
+	});
+	champArray = champArray.sort(function(a, b){
+		return champDATA[a].name.localeCompare(champDATA[b].name);
+	});
+
+	for (var i=0; i<champArray.length; i++) {
+		var champUrl = "http://ddragon.leagueoflegends.com/cdn/5.14.1/img/champion/"
+		+ champDATA[champArray[i]].image.full;
+		$("#champ-select-portraits").append("<span class=\"champ-icon\" id=\"champ-icon-id-" + champArray[i] + "\"><img src=\"" + champUrl + "\"></span>");
+		$("#champ-icon-id-" + champArray[i]).click(function(){
+			closeChampWindow();
+			var champID = this.id.substr(14);
+			loadNewChamp(champDATA[champID]);
+		});
+	}
+
+	//set first random champion
+	loadNewChamp(champDATA[champArray[
+		Math.floor(Math.random() * champArray.length)]]);
+
+	//set scrollbar size and movement
+	$("#champ-select-area").scroll(function(){
+		var scrollRatio = $("#champ-select-area").scrollTop() /
+			(champScrollbar.totalHeight - champScrollbar.visibleHeight);
+		var top = scrollRatio * (champScrollbar.scrollbarHeight -
+			champScrollbar.scrollposHeight);
+		$("#champ-scroll .scrollbar-pos").css("top", top);
+	});
+
+}
+
 var loadNewPage = function() {
+	dataProms = [];
+
 	//remove current content
 	//load all page content while switching
-	loadingDef = $.Deferred();
+	if (currentPage == pageName.MAIN) {
+		$("#main-panel").show();
+		$("#champ-panel").hide();
+		$("#misc-panel").hide();
+	} else if (currentPage == pageName.CHAMP) {
+		$("#main-panel").hide();
+		$("#champ-panel").show();
+		$("#misc-panel").hide();
+
+		dataProms.push(loadChampList());
+		resizeChampPage();
+	} else if (currentPage == pageName.MISC) {
+		$("#main-panel").hide();
+		$("#champ-panel").hide();
+		$("#misc-panel").show();
+	}
 
 	//when everything loaded
+	$.when.apply($, dataProms).done(function () {
 		loadingDef.resolve();
-
-	return loadingDef.promise();
+	});
 }
 
 var showPanel = function() {
-	//HIDE COIN HERE
+	$("#loading-coin").hide();
 	//show panel after everything loaded
-	$("#main-panel").animate({"opacity": mainOpacity},
+	$("#all-panel").animate({"opacity": 1.0},
 		{duration: 500, queue: false, easing: "linear", complete: function() {
 			//finished showing current page
 		}});
 }
 var hidePanel = function() {
-	$("#main-panel").animate({"opacity": 0.0},
+	$("#all-panel").animate({"opacity": 0.0},
 		{duration: 500, queue: false, easing: "linear", complete: function() {
-			//load all content
 			$("body").scrollTop(0);
-			return loadNewPage();
+			loadNewPage();
 		}});
 }

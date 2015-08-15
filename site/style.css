@@ -23,6 +23,23 @@ body {
 	z-index: 10;
 }
 
+.scrollbar-area {
+	position: absolute;
+	width: 4px;
+	top: 5px;
+	bottom: 5px;
+	right: 7px;
+	background-color: #242424;
+	border-radius: 3px;
+}
+.scrollbar-pos {
+	position: absolute;
+	height: 30px;
+	width: 4px;
+	background-color: #B5B5B5;
+	border-radius: 3px;
+}
+
 #side-buttons {
 	position: fixed;
 	top: 40%;
@@ -54,10 +71,156 @@ body {
 	cursor: pointer;
 }
 
-#main-panel {
+#loading-coin {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+}
+
+#all-panel {
+	position: relative;
 	margin: 50px auto;
-	background-color: black;
+	background-color: rgba(0,0,0,0.8);;
 	border-radius: 10px;
 	width: 70%;
-	height: 1500px;
+	height: auto;
+	color: white;
+	padding: 20px;
+}
+/*
+MAIN PANEL START
+*/
+#main-panel{
+
+}
+#main-graph, #main-brawlers{
+	width: 90%;
+	height: 400px;
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: rgba(0,0,0,0.5);
+}
+#main-brawlers {
+	margin-top: 10px;
+}
+
+/*
+CHAMP PANEL START
+*/
+#champ-panel {
+	
+}
+#champ-top {
+	position: relative;
+}
+#champ-bot {
+	position: relative;
+	top: 10px;
+	padding: 20px;
+}
+#champ-main-img {
+	display: inline-block;
+	position: relative;
+	width: 25%;
+	border-radius: 50%;
+	overflow: hidden;
+}
+#champ-main-img img{
+	display: block;
+	position: absolute;
+	height: auto;
+}
+#champ-left-content {
+	display: inline-block;
+	width: 36%;
+	text-align: right;
+}
+#champ-right-content {
+	display: inline-block;
+	width: 36%;
+}
+#champ-select-button {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 40px;
+	height: 40px;
+	background-color: gray;
+	border-radius: 3px;
+	cursor: pointer;
+}
+#champ-select-window {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 100%;
+	height: 300px;
+	z-index: 20;
+	overflow: hidden;
+	background-color: black;
+	-webkit-user-select: none; /* Chrome/Safari */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+ */
+}
+#champ-select-bottom {
+	position: absolute;
+	height: 6px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	background-color: black;
+}
+#champ-scroll {
+	top: 27px;
+}
+#champ-select-area {
+	position: absolute;
+	top: 23px;
+	left: 0px;
+	bottom: 0px;
+	right: -18px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	background-color: black;
+}
+#champ-select-portraits {
+	position: absolute;
+	height: auto;
+	right: 17px;
+	left: 5px;
+	top: 0px;
+	padding-bottom: 5px;
+}
+#champ-select-area img {
+	width: 48px;
+	height: auto;
+}
+.champ-icon {
+	cursor: pointer;
+	margin: 2px;
+}
+#champ-select-text {
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 2px;
+	text-align: center;
+	font-weight: bold;
+}
+#champ-select-close {
+	position: absolute;
+	top: 4px;
+	right: 3px;
+	width: 18px;
+	height: 18px;
+	text-align: center;
+	line-height: 15px;
+	-webkit-user-select: none; /* Chrome/Safari */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+ */
+	background-color: red;
+	border-radius: 50%;
+	cursor: pointer;
+	font-family: sans-serif;
 }

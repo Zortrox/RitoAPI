@@ -10,12 +10,43 @@
 		<img id="load-bg-img" style="display: none;">
 	</div>
 	<div id="wrapper">
+		<div><img src="img/loading-coin.gif" id="loading-coin" style="display: none;"></div>
 		<div id="side-buttons" unselectable="on">
 			<div id="button-page1" unselectable="on">Main</div>
 			<div id="button-page2" unselectable="on">Champ</div>
 			<div id="button-page3" unselectable="on">Other</div>
 		</div>
-		<div id="main-panel">&nbsp;</div>
+		<div id="all-panel">
+			<div id="main-panel">
+				<div id="main-graph">GRAPH</div>
+				<div id="main-brawlers">BRAWLER DATA</div>
+			</div>
+			<div id="champ-panel">
+				<div id="champ-top">
+					<span id="champ-left-content">Left-content</span>
+					<span id="champ-main-img">
+						<img>
+					</span>
+					<span id="champ-right-content">Right-content</span>
+					<div id="champ-select-button">&nbsp;</div>
+					<div id="champ-select-window" unselectable="on">
+						<div id="champ-select-area">
+							<div id="champ-select-portraits"></div>
+						</div>
+						<div id="champ-select-bottom">&nbsp;</div>
+						<div id="champ-select-text">Select a Champion</div>
+						<div id="champ-select-close" unselectable="on">x</div>
+						<div class="scrollbar-area" id="champ-scroll">
+							<div class="scrollbar-pos">&nbsp;</div>
+						</div>
+					</div>
+				</div>
+				<div id="champ-bot">
+					Down here is where content goes about other stuff and things.
+				</div>
+			</div>
+			<div id="misc-panel">MISC-PANEL</div>
+		</div>
 	</div>
 </body>
 </html>
