@@ -25,19 +25,21 @@ body {
 
 .scrollbar-area {
 	position: absolute;
-	width: 4px;
+	width: 6px;
 	top: 5px;
 	bottom: 5px;
 	right: 7px;
 	background-color: #242424;
 	border-radius: 3px;
+	cursor: default;
 }
 .scrollbar-pos {
 	position: absolute;
 	height: 30px;
-	width: 4px;
+	width: 6px;
 	background-color: #B5B5B5;
 	border-radius: 3px;
+	cursor: default;
 }
 
 #side-buttons {
@@ -193,7 +195,7 @@ CHAMP PANEL START
 	padding-bottom: 5px;
 }
 #champ-select-area img {
-	width: 48px;
+	width: 50px;
 	height: auto;
 }
 .champ-icon {

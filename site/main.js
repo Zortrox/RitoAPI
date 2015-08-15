@@ -12,6 +12,11 @@ var dataProms = [];
 var champDATA = null;
 var champArray = [];
 var champScrollbar = null;
+var currentChampX = 0;
+var currentChampY = 0;
+var currentChampZoom = .6;
+var champPortraitWidth = 1215;
+var champPortraitHeight = 717;
 
 $(document).ready(function(){
 	$("#button-page1").click(function(){
@@ -55,18 +60,26 @@ $(document).ready(function(){
 	});
 });
 
-var resizeChampPage = function() {
+var resizeChampPage = function(offsetX, offsetY, zoom) {
 	var width = $(window).width();
 	var circleWidth = $("#champ-main-img").width();
-	var ratio = width/1215;
-	var offsetX = 960;
-	var offsetY = 245;
-	var zoom = 0.6;
+	var ratio = width/champPortraitWidth;
+
+	if (offsetX != null) {
+		currentChampX = offsetX;
+	}
+	if (offsetY != null) {
+		currentChampY = offsetY;
+	}
+	if (zoom != null) {
+		currentChampZoom = zoom;
+	}
+
 	$("#champ-main-img").height(circleWidth);
 	$("#champ-main-img img").css({
-		"width": $(window).width() * zoom,
-		"margin-left": -(offsetX * ratio * zoom - circleWidth/2),
-		"margin-top": -(offsetY * ratio * zoom - circleWidth/2),
+		"width": $(window).width() * currentChampZoom,
+		"margin-left": -(currentChampX * ratio * currentChampZoom - circleWidth/2),
+		"margin-top": -(currentChampY * ratio * currentChampZoom - circleWidth/2),
 	});
 }
 
@@ -125,6 +138,7 @@ var loadImage = function(elem, data) {
 	elem.attr("src", data).load(function() {
 		dfd.resolve();
 	});
+
 	return dfd.promise();
 }
 
@@ -135,7 +149,7 @@ var loadChampList = function() {
 		$.ajax({
 			'async': true,
 			'global': false,
-			'url': "getStatic.php",
+			'url': "champData.json",
 			'dataType': "json",
 			'success': function (data) {
 				champDATA = data.data;
@@ -176,9 +190,16 @@ var loadNewChamp = function(champ) {
 	//spin champion main portrait
 	//blank, gray, or mark out data
 
-	return loadImage($("#champ-main-img img"),
+	var imgProm = loadImage($("#champ-main-img img"),
 		"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + 
 		champ.key + "_0.jpg");
+	imgProm.done(function(){
+		var x = champ.image.x;
+		var y = champ.image.y;
+		var zoom = champ.image.zoom == null ? 0.6 : parseFloat(champ.image.zoom);
+		resizeChampPage(x, y, zoom);
+	});
+	return imgProm;
 
 	//when all data loaded,
 		//remove spinning wheel
@@ -213,14 +234,14 @@ var createChampArray = function(dfd) {
 			closeChampWindow();
 			var champID = this.id.substr(14);
 			loadNewChamp(champDATA[champID]).done(function(){
-				alert("Finished");
+				//FINISHED LOADING CHAMP
 			});
 		});
 	}
 
 	//set first random champion
-	var imgProm = loadNewChamp(champDATA[champArray[
-		Math.floor(Math.random() * champArray.length)]]);
+	var randID = Math.floor(Math.random() * champArray.length);
+	var imgProm = loadNewChamp(champDATA[champArray[randID]]);
 
 	//set scrollbar size and movement
 	$("#champ-select-area").scroll(function(){
