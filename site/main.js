@@ -17,6 +17,7 @@ var currentChampY = 0;
 var currentChampZoom = .6;
 var champPortraitWidth = 1215;
 var champPortraitHeight = 717;
+var doCoinAnim = false;
 
 $(document).ready(function(){
 	$("#button-page1").click(function(){
@@ -36,12 +37,12 @@ $(document).ready(function(){
 
 	$("#all-panel").css("opacity", 0.0);
 	$("#side-buttons").css("opacity", 0.0);
-	$("#loading-coin").show();
+	loadingCoinStart();
 	$("#load-bg-img").attr("src", "img/Bilgewater_Slaughter_Docks.jpg").load(function() {
 		$(this).remove();
 		$("#bg-img").css("opacity", 0.0);
 		$("#bg-img").css("background-image", "url('img/Bilgewater_Slaughter_Docks.jpg')");
-		$("#loading-coin").hide();
+		loadingCoinStop();
 		var prom2 = $("#bg-img").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear", complete:
 			function() {
 				//show rest of page
@@ -57,6 +58,8 @@ $(document).ready(function(){
 		if ( $("champ-select-window").css("display") != "none") {
 			champScrollbar.getSizes();
 		}
+
+		resizeMiscPage();
 	});
 });
 
@@ -82,6 +85,15 @@ var resizeChampPage = function(offsetX, offsetY, zoom) {
 		"margin-top": -(currentChampY * ratio * currentChampZoom - circleWidth/2),
 	});
 }
+var resizeMiscPage = function() {
+	var width = $("#misc-map-width").width();
+
+	$("#misc-map-beam").height(width * 9/16);
+	$("#misc-scroll-map").width(width);
+	$("#misc-scroll-map").height(width * 9/16);
+	$("#misc-sr-map").width(width * .3);
+}
+
 
 $.fn.animateBG = function(x, speed) {
 	//animate background image position to simulate page movement
@@ -106,7 +118,7 @@ $.fn.animateBG = function(x, speed) {
 
 var arrivedAtPage = function() {
 	canChangePage = true;
-	$("#loading-coin").show();
+	loadingCoinStart();
 }
 var showWhenLoaded= function(prom1, prom2) {
 	$.when(prom1, prom2).done(function() {
@@ -118,7 +130,7 @@ var changePage = function(perc, page) {
 	//wait until page switch ended before going to next page
 	if (page != currentPage && canChangePage) {
 		loadingDef.reject();	//don't show previous page
-		$("#loading-coin").hide();	//cancel current loading anim
+		loadingCoinStop();	//cancel current loading anim
 		loadingDef = $.Deferred();
 		var prom1 = loadingDef.promise();
 
@@ -187,6 +199,7 @@ var closeChampWindow = function() {
 }
 
 var loadNewChamp = function(champ) {
+	//TODO: this function
 	//spin champion main portrait
 	//blank, gray, or mark out data
 
@@ -207,6 +220,8 @@ var loadNewChamp = function(champ) {
 }
 
 var createChampArray = function(dfd) {
+	var proms = [];
+
 	//add custom grid of champions to elem
 	$("#champ-select-window").hide();
 	$("#champ-select-button").click(function(){
@@ -218,6 +233,8 @@ var createChampArray = function(dfd) {
 		closeChampWindow();
 	});
 
+	proms.push(loadImage($("#champ-select-button img"), "http://ddragon.leagueoflegends.com/cdn/5.2.1/img/ui/champion.png"));
+
 	champArray = [];
 	$.each(champDATA, function(i, champID){
 		champArray.push(champID.id);
@@ -227,6 +244,7 @@ var createChampArray = function(dfd) {
 	});
 
 	for (var i=0; i<champArray.length; i++) {
+		//TODO check if add to proms
 		var champUrl = "http://ddragon.leagueoflegends.com/cdn/5.14.1/img/champion/"
 		+ champDATA[champArray[i]].image.full;
 		$("#champ-select-portraits").append("<span class=\"champ-icon\" id=\"champ-icon-id-" + champArray[i] + "\"><img src=\"" + champUrl + "\"></span>");
@@ -234,14 +252,14 @@ var createChampArray = function(dfd) {
 			closeChampWindow();
 			var champID = this.id.substr(14);
 			loadNewChamp(champDATA[champID]).done(function(){
-				//FINISHED LOADING CHAMP
+				//TODO: Switch to loaded champ
 			});
 		});
 	}
 
 	//set first random champion
 	var randID = Math.floor(Math.random() * champArray.length);
-	var imgProm = loadNewChamp(champDATA[champArray[randID]]);
+	proms.push(loadNewChamp(champDATA[champArray[randID]]));
 
 	//set scrollbar size and movement
 	$("#champ-select-area").scroll(function(){
@@ -252,9 +270,29 @@ var createChampArray = function(dfd) {
 		$("#champ-scroll .scrollbar-pos").css("top", top);
 	});
 
-	imgProm.done(function() {
+	$.when.apply($, proms).done(function() {
 		dfd.resolve();
 	});
+}
+
+var loadMiscPanel = function() {
+	var proms = [];
+
+	proms.push(loadImage($("#misc-sr-map img"), "img/heatmap.jpg"));
+	proms.push(loadImage($("#misc-scroll-map img"), "img/parchment16x9.jpg"));
+
+	resizeMiscPage();
+
+	return $.when.apply($, proms);
+}
+
+var animateMap = function() {
+	$("#misc-map audio").attr("src", "snd/mapunroll.mp3");
+	$("#misc-map audio").attr("autoplay", "autoplay");
+	$("#misc-map").animate({"width": "100%"}, {duration: 2000, queue: false,
+		complete: function() {
+
+		}});
 }
 
 var loadNewPage = function() {
@@ -277,20 +315,63 @@ var loadNewPage = function() {
 		$("#main-panel").hide();
 		$("#champ-panel").hide();
 		$("#misc-panel").show();
+
+		dataProms.push(loadMiscPanel());
 	}
 
 	//when everything loaded
 	$.when.apply($, dataProms).done(function () {
 		loadingDef.resolve();
+
+		//TODO: load other resources since page finished loading
 	});
 }
 
-var showPanel = function() {
+var loadingCoinAnim = function(forwards, front) {
+	var css = null;
+	var coinEase = "";
+	if (forwards) {
+		css = {"left": "28px", "width": "0px"};
+		coinEase = "easeInQuad";
+	} else {
+		css = {"left": "0px", "width": "60px"}
+		coinEase = "easeOutQuad";
+	}
+	if (front) {
+		$("#loading-coin img:first-of-type").attr("src", "img/krakenFront.png");
+	} else {
+		$("#loading-coin img:first-of-type").attr("src", "img/krakenBack.png");
+	}
+
+	$("#loading-coin img:first-of-type").animate(css,
+		{duration: 500, queue: false, easing: coinEase, complete: function(){
+			//flip coin
+			if (forwards) front = !front;
+			if (doCoinAnim) loadingCoinAnim(!forwards, front);
+			else {
+				$("#loading-coin img:first-of-type").css({"left": "0px", "width": "60px"});
+			}
+		}});
+}
+var loadingCoinStart = function() {
+	$("#loading-coin").show();
+	doCoinAnim = true;
+	loadingCoinAnim(true, true);
+}
+var loadingCoinStop = function() {
 	$("#loading-coin").hide();
+	doCoinAnim = false;
+}
+
+var showPanel = function() {
+	loadingCoinStop();
 	//show panel after everything loaded
 	$("#all-panel").animate({"opacity": 1.0},
 		{duration: 500, queue: false, easing: "linear", complete: function() {
 			//finished showing current page
+			if (currentPage == pageName.MISC) {
+				animateMap();
+			}
 		}});
 }
 var hidePanel = function() {

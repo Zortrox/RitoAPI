@@ -77,6 +77,15 @@ body {
 	position: fixed;
 	top: 50%;
 	left: 50%;
+	width: 60px;
+	height: 60px;
+	margin-left: -30px;
+}
+#loading-coin img {
+	position: absolute;
+	left: 0px;
+	width: 60px;
+	height: 60px;
 }
 
 #all-panel {
@@ -152,6 +161,12 @@ CHAMP PANEL START
 	border-radius: 3px;
 	cursor: pointer;
 }
+#champ-select-button img {
+	margin-left: 8px;
+	margin-top: 7px;
+	width: 24px;
+	height: auto;
+}
 #champ-select-window {
 	position: absolute;
 	top: 0px;
@@ -225,4 +240,47 @@ CHAMP PANEL START
 	border-radius: 50%;
 	cursor: pointer;
 	font-family: sans-serif;
+}
+
+/*
+MISC PANEL START
+*/
+#misc-panel {
+
+}
+#misc-map{
+	position: relative;
+	width: 20%;
+	height: auto;
+	overflow-x: hidden;
+	box-shadow: 5px 0px 8px 2px #000;
+}
+#misc-scroll-map {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	overflow-x: hidden;
+}
+#misc-scroll-map img{
+	position: absolute;
+	width: 100%;
+	height: auto;
+}
+#misc-sr-map {
+	position: absolute;
+	margin-left: auto;
+	margin-right: auto;
+	top: 20px;
+	left: 30px;
+}
+#misc-sr-map img{
+	position: relative;
+	left: 0px;
+	width: 100%;
+	height: auto;
+	border-top-left-radius: 25%;
+	border-bottom-right-radius: 25%;
+	border-top-right-radius: 30px;
+	border-bottom-left-radius: 30px;
+	box-shadow: inset 0px 0px 20px #C49700;
 }
