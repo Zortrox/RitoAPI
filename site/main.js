@@ -20,37 +20,41 @@ var champPortraitHeight = 717;
 var doCoinAnim = false;
 
 $(document).ready(function(){
+	loadingCoinStart();
+
 	$("#button-page1").click(function(){
-		changePage(0, 1);
+		changePage(pageName.MAIN);
 	})
 	$("#button-page2").click(function(){
-		changePage(50, 2);
+		changePage(pageName.CHAMP);
 	})
 	$("#button-page3").click(function(){
-		changePage(100, 3);
+		changePage(pageName.MISC);
 	})
 
 	var prom1 = loadingDef.promise();
-	loadNewPage();
-
 	champScrollbar = new Scrollbar();
-
+	
 	$("#all-panel").css("opacity", 0.0);
+	$("body").css("overflow", "hidden");
+	$("#all-panel").show();
 	$("#side-buttons").css("opacity", 0.0);
-	loadingCoinStart();
-	$("#load-bg-img").attr("src", "img/Bilgewater_Slaughter_Docks.jpg").load(function() {
-		$(this).remove();
-		$("#bg-img").css("opacity", 0.0);
-		$("#bg-img").css("background-image", "url('img/Bilgewater_Slaughter_Docks.jpg')");
+	$("#side-buttons").show();
+	
+	loadNewPage();
+	$("#bg-img img").css("opacity", 0.0);
+	$("#bg-img img").load(function() {
 		loadingCoinStop();
-		var prom2 = $("#bg-img").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear", complete:
+		$("#bg-img img").show();
+		var prom2 = $("#bg-img img").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear", complete:
 			function() {
 				//show rest of page
+				$("body").css("overflow", "auto");
 				$("#side-buttons").animate({"opacity": 1.0}, {duration: 500, queue: false, easing: "linear"});
 				arrivedAtPage();
 			}}).promise();
 
-		showWhenLoaded(prom1, prom2);
+		showWhenLoaded(prom1, prom2, currentPage);
 	});
 
 	$(window).resize(function(){
@@ -91,27 +95,31 @@ var resizeMiscPage = function() {
 	$("#misc-map-beam").height(width * 9/16);
 	$("#misc-scroll-map").width(width);
 	$("#misc-scroll-map").height(width * 9/16);
-	$("#misc-sr-map").width(width * .3);
+	$("#map-content").width(width - 20);
+	$("#map-content").height(width * 9/16 - 20);
+	$("#misc-map-overlay img").width(width);
+	$("#misc-map-overlay #map-shadows").height(width * 9/16);
+	$("#misc-map-overlay #map-highlights").height(width * 9/16);
 }
 
 
-$.fn.animateBG = function(x, speed) {
+var animateBG = function(page) {
 	//animate background image position to simulate page movement
 	var dfd = $.Deferred();
-	var pos = this.css('background-position').split(' ');
-	this.x = parseInt(pos[0]) || 0;
-	$.Animation( this, {
-			x: x,
-		}, {
-			duration: speed,
-			queue: false,
-			complete: function() {
-				arrivedAtPage();
-				dfd.resolve();
-			}
-		}).progress(function(e) {
-			this.css('background-position', e.tweens[0].now+'% 0%');
-	});
+	var css = null;
+
+	if (page == pageName.MAIN) {
+		css = {"left": 0};
+	} else if (page == pageName.CHAMP) {
+		css = {"left": -($("#bg-img img").width() - $(window).width()) / 2};
+	} else if (page == pageName.MISC) {
+		css = {"left": -($("#bg-img img").width() - $(window).width())};
+	}
+
+	$("#bg-img img").animate(css, {duration: 2000, queue: false, complete: function() {
+		arrivedAtPage();
+		dfd.resolve();
+	}})
 
 	return dfd.promise();
 }
@@ -120,13 +128,13 @@ var arrivedAtPage = function() {
 	canChangePage = true;
 	loadingCoinStart();
 }
-var showWhenLoaded= function(prom1, prom2) {
+var showWhenLoaded = function(prom1, prom2, page) {
 	$.when(prom1, prom2).done(function() {
-		showPanel();
+		showPanel(page);
 	});
 }
 
-var changePage = function(perc, page) {
+var changePage = function(page) {
 	//wait until page switch ended before going to next page
 	if (page != currentPage && canChangePage) {
 		loadingDef.reject();	//don't show previous page
@@ -137,21 +145,112 @@ var changePage = function(perc, page) {
 		canChangePage = false;
 		currentPage = page;
 		hidePanel();
-		var prom2 = $("#bg-img").animateBG(perc, 2000);
+		var prom2 = animateBG(page);
 
 		//shows panel when everything loads AND
 		//when on correct "page"
-		showWhenLoaded(prom1, prom2);
+		showWhenLoaded(prom1, prom2, currentPage);
 	}
 }
 
-var loadImage = function(elem, data) {
+var loadSource = function(elem, data) {
 	var dfd = $.Deferred();
-	elem.attr("src", data).load(function() {
-		dfd.resolve();
-	});
+
+	//load data
+	elem.attr("src", data);
+
+	//resolve when data fully loaded
+	if (elem.is("audio")) {
+		elem.on("canplay canplaythrough", function(){
+			dfd.resolve();
+		});
+	} else {
+		elem.load(function() {
+			dfd.resolve();
+		});
+	}
 
 	return dfd.promise();
+}
+
+var loadMainPanel = function() {
+	var newChamp = {
+		name: "Winrate",
+		color: "#B60F2B",
+		data: [],
+		showInLegend: false,
+	};
+	for (var i=0; i<126; i++) {
+		newChamp.data.push({ y: i, champID: 62});
+	}
+
+	$("#main-chart").highcharts({
+		chart: {
+			type: "column",
+			backgroundColor: "transparent",
+			marginLeft: 30,
+			marginRight: 15
+		},
+		xAxis: {
+			categories: ["Aatrox", "Is", "Good"]
+		},
+		yAxis: {
+			min: 0,
+			max: 130,
+			gridLineWidth: 0,
+			labels: {
+				enabled: false
+			}
+		},
+		title: null,
+		legend: {
+			reversed: true
+		},
+		credits: {
+			enabled: false
+		},
+		series: [newChamp],
+
+		plotOptions: {
+			column: {
+				borderWidth: 0
+			},
+			series: {
+				cursor: "pointer",
+				allowPointSelect: true,
+				point: {
+					events: {
+						click: function(event) {
+							var series = $("#main-chart").highcharts().series[0];
+							//series.color = "#7cb5ec";
+							$("#main-chart").highcharts().legend.colorizeItem(series, series.visible);
+							$.each(series.data, function(i, point) {
+								point.graphic.attr({
+									//fill: "#7cb5ec"
+								});
+							});
+							series.redraw();
+							this.update({ y:126-this.y }, true, false);
+							//selected = this;
+						},
+						mouseOver: function() {
+							//if(this != selected)
+                    		//this.update({ color: '' }, true,false);
+						}
+					}
+				}
+			}
+		}
+	});
+
+	$("#main-chart").highcharts().series[0].redraw();
+
+	$(window).click(function() {
+		$("#main-chart").highcharts().series[0].data[0].graphic.attr({width: $("#main-chart").highcharts().chartWidth - 50,
+			x: 20
+		});
+		//$("#main-chart").highcharts().series[0].redraw();
+	})
 }
 
 var loadChampList = function() {
@@ -177,7 +276,7 @@ var loadChampList = function() {
 
 function Scrollbar() {
 	var self = this;
- 	self.totalHeight = 0;
+	self.totalHeight = 0;
 	self.visibleHeight = 0;
 	self.scrollbarHeight = 0;
 	self.scrollposHeight = 0;
@@ -203,7 +302,7 @@ var loadNewChamp = function(champ) {
 	//spin champion main portrait
 	//blank, gray, or mark out data
 
-	var imgProm = loadImage($("#champ-main-img img"),
+	var imgProm = loadSource($("#champ-main-img img"),
 		"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + 
 		champ.key + "_0.jpg");
 	imgProm.done(function(){
@@ -233,7 +332,7 @@ var createChampArray = function(dfd) {
 		closeChampWindow();
 	});
 
-	proms.push(loadImage($("#champ-select-button img"), "http://ddragon.leagueoflegends.com/cdn/5.2.1/img/ui/champion.png"));
+	proms.push(loadSource($("#champ-select-button img"), "http://ddragon.leagueoflegends.com/cdn/5.2.1/img/ui/champion.png"));
 
 	champArray = [];
 	$.each(champDATA, function(i, champID){
@@ -278,18 +377,40 @@ var createChampArray = function(dfd) {
 var loadMiscPanel = function() {
 	var proms = [];
 
-	proms.push(loadImage($("#misc-sr-map img"), "img/heatmap.jpg"));
-	proms.push(loadImage($("#misc-scroll-map img"), "img/parchment16x9.jpg"));
+	var parchmentProm = loadSource($("#misc-scroll-map img"), "img/parchment16x9.jpg");
+	proms.push(parchmentProm);
+	proms.push(loadSource($("#misc-sr-map img"), "img/heatmap.jpg"));
+	proms.push(loadSource($("#misc-map audio"), "snd/mapunroll.mp3"));
+	parchmentProm.done(function() {
+		$("#misc-map-overlay img").attr("src", "img/parchment16x9.jpg");
+	});
 
 	resizeMiscPage();
+	$("#misc-map").width("20%");
+	$("#misc-map-overlay img").css("right", "0px");
+	$("#misc-map-overlay").width("80%");
 
 	return $.when.apply($, proms);
 }
 
+var playMapSound = function() {
+	$("#misc-map audio")[0].play();
+}
 var animateMap = function() {
-	$("#misc-map audio").attr("src", "snd/mapunroll.mp3");
-	$("#misc-map audio").attr("autoplay", "autoplay");
-	$("#misc-map").animate({"width": "100%"}, {duration: 2000, queue: false,
+	//don't go below 1000 (1 sec) for the speed
+	var unrollSpeed = 1000;
+	var uncurlSpeed = unrollSpeed * 1.0666;
+	setTimeout(playMapSound, unrollSpeed - 1000);
+
+	$("#misc-map").animate({"width": "100%"}, {duration: unrollSpeed, queue: false, easing: "easeInQuad",
+		complete: function() {
+
+		}});
+	$("#misc-map-overlay img").animate({"right": -($("#misc-map").width())}, {duration: unrollSpeed, queue: false, easing: "easeInQuad",
+		complete: function() {
+
+		}});
+	$("#misc-map-overlay").animate({"width": "0%"}, {duration: uncurlSpeed, queue: false, easing: "easeOutQuad",
 		complete: function() {
 
 		}});
@@ -304,6 +425,8 @@ var loadNewPage = function() {
 		$("#main-panel").show();
 		$("#champ-panel").hide();
 		$("#misc-panel").hide();
+
+		loadMainPanel();
 	} else if (currentPage == pageName.CHAMP) {
 		$("#main-panel").hide();
 		$("#champ-panel").show();
@@ -351,7 +474,7 @@ var loadingCoinAnim = function(forwards, front) {
 			else {
 				$("#loading-coin img:first-of-type").css({"left": "0px", "width": "60px"});
 			}
-		}});
+		}}); 
 }
 var loadingCoinStart = function() {
 	$("#loading-coin").show();
@@ -363,13 +486,14 @@ var loadingCoinStop = function() {
 	doCoinAnim = false;
 }
 
-var showPanel = function() {
+var showPanel = function(page) {
 	loadingCoinStop();
+
 	//show panel after everything loaded
 	$("#all-panel").animate({"opacity": 1.0},
 		{duration: 500, queue: false, easing: "linear", complete: function() {
 			//finished showing current page
-			if (currentPage == pageName.MISC) {
+			if (page == pageName.MISC) {
 				animateMap();
 			}
 		}});
