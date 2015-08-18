@@ -145,6 +145,7 @@ CHAMP PANEL START
 	position: relative;
 	width: 25%;
 	border-radius: 50%;
+	background-color: black;
 	overflow: hidden;
 }
 #champ-main-img img{
