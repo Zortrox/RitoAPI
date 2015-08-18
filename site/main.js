@@ -360,14 +360,12 @@ var createMainChart = function() {
 			categories: champNames
 		},
 		yAxis: {
-			min: 0,
-			max: 130,
 			gridLineWidth: 0,
 			labels: {
 				enabled: false
 			},
 			title: {
-				text: "Pickrate"
+				text: "Pick Rate"
 			}
 		},
 		title: null,
@@ -385,7 +383,7 @@ var createMainChart = function() {
 			},
 			series: {
 				pointPadding: 0,
-				//groupPadding: 0.1,
+				groupPadding: 0.1,
 				cursor: "pointer",
 				allowPointSelect: true,
 				point: {
@@ -417,14 +415,14 @@ var createMainChart = function() {
 
 	$(".highcharts-yaxis-title").css("cursor", "pointer");
 	$(".highcharts-yaxis-title").click(function(){
-		if ($(this).text() == "Pickrate") {
+		if ($(this).text() == "Pick Rate") {
 			$("#main-chart").highcharts().yAxis[0].axisTitle.attr({
-				text: "Winrate"
+				text: "Win Rate"
 			});
 			$("#main-chart").highcharts().series[0].setData(getWinrateData());
-		} else if ($(this).text() == "Winrate") {
+		} else if ($(this).text() == "Win Rate") {
 			$("#main-chart").highcharts().yAxis[0].axisTitle.attr({
-				text: "Pickrate"
+				text: "Pick Rate"
 			});
 			$("#main-chart").highcharts().series[0].setData(getPickrateData());
 		}
