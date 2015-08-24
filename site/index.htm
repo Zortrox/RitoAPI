@@ -1,7 +1,9 @@
 <html>
 <head>
-	<title>RITO API THINGY</title>
-	<link href="style.css" rel="stylesheet" type="text/css">
+	<title>Much Brawlers</title>
+	<link rel="stylesheet" href="style.css" type="text/css">
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/vader/jquery-ui.css">
+	<link href='http://fonts.googleapis.com/css?family=Gloria+Hallelujah' rel='stylesheet' type='text/css'>
 </head>
 <body>
 	<div id="bg-img">
@@ -16,19 +18,42 @@
 			<div id="button-page1" unselectable="on">Main</div>
 			<div id="button-page2" unselectable="on">Champ</div>
 			<div id="button-page3" unselectable="on">Other</div>
+			<a href="about/">
+				<div id="button-about" unselectable="on">About</div>
+			</a>
 		</div>
 		<div id="all-panel" style="display: none;">
 			<div id="main-panel">
-				<div id="main-chart"></div>
-				<div id="main-brawlers">BRAWLER DATA</div>
+				<div id="chart-tutorial" style="display: none;">
+					<div id="chart-tutorial-close" unselectable="on">x</div>
+					<img>
+					<div id="chart-tutorial-info">This is how you use this button.  It is very buttony and very nice.</div>
+				</div>
+				<div id="main-top-data">
+					<div id="chart-slider"></div>
+					<div id="main-chart"></div>
+					<div id="time-slider">
+						<p>Pick rate based on time of day: [7:00 - 7:10pm] EST</p>
+						<div></div>
+					</div>
+				</div>
+				<div id="main-brawlers">
+					<div id="brawlers-chart"></div>
+				</div>
 			</div>
 			<div id="champ-panel">
 				<div id="champ-top">
-					<span id="champ-left-content">Left-content</span>
+					<span id="champ-left-content">
+						<div>&nbsp;</div>
+						<canvas width="0" height="0"></canvas>
+					</span>
 					<span id="champ-main-img">
 						<img>
 					</span>
-					<span id="champ-right-content">Right-content</span>
+					<span id="champ-right-content">
+						<canvas width="0" height="0"></canvas>
+						<div>&nbsp;</div>
+					</span>
 					<div id="champ-select-button"><img></div>
 					<div id="champ-select-window" unselectable="on">
 						<div id="champ-select-area">
@@ -42,8 +67,11 @@
 						</div>
 					</div>
 				</div>
+				<div id="champ-name"></div>
 				<div id="champ-bot">
-					Down here is where content goes about other stuff and things.
+					<p id="champ-winning-item"><img><br>Highest Winning Item</p>
+					<div id="champ-stats-line"></div>
+					<div id="champ-stats-chart"></div>
 				</div>
 			</div>
 			<div id="misc-panel">
@@ -59,9 +87,8 @@
 					<div id="misc-map-beam" style="width: 0px;">&nbsp;</div>
 					<div id="misc-scroll-map"><img></div>
 					<div id="map-content">
-						<div id="misc-sr-map"><img></div>
-						<p>Here is some random text.</p>
-						<p>And another "paragraph".  There is 10px of padding here, but that can be changed.  Also, I can pretty much put content anywhere and it'll be hidden until the map unrolls.  :D  I can change the speed of the unrolling too (with a simple variable ratio!) if need be.  Right now I'm just typing more stuff just to put more content on here.  Also, yes, I did make this from scratch.  There are like 5 elements in that roll (2 for shadows/highlights!).</p>
+						<div id="misc-sr-map"><img>This heatmap shows where the most deaths occured during the event.  The darker the blood, the more deaths.</div>
+						<div id="misc-teemo-killed"><img>18,345 Teemo Deaths</div>
 					</div>
 				</div>
 			</div>
@@ -73,5 +100,3 @@
 <script src="main.js" type="text/javascript"></script>
 <script src="http://code.highcharts.com/highcharts.js" type="text/javascript"></script>
 </html>
-
-<!-- hover over graph bar to make singular bigger-->
