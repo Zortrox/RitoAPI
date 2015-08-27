@@ -24,10 +24,10 @@
 		</div>
 		<div id="all-panel" style="display: none;">
 			<div id="main-panel">
-				<div id="chart-tutorial" style="display: none;">
-					<div id="chart-tutorial-close" unselectable="on">x</div>
+				<div id="chart-tutorial" class="tutorial" style="display: none;">
+					<div id="chart-tutorial-close" class="tutorial-close" unselectable="on">x</div>
 					<img>
-					<div id="chart-tutorial-info">This is how you use this button.  It is very buttony and very nice.</div>
+					<div id="chart-tutorial-info" class="tutorial-info">This is how you use this button.  It is very buttony and very nice.</div>
 				</div>
 				<div id="main-top-data">
 					<div id="chart-slider"></div>
@@ -39,37 +39,54 @@
 				</div>
 				<div id="main-brawlers">
 					<div id="brawlers-chart"></div>
+					<div id="brawler-img">
+						<img id="brawler-img-rf">
+						<img id="brawler-img-ib">
+						<img id="brawler-img-pc">
+						<img id="brawler-img-op">
+						<img id="brawler-img-none">
+					</div>
 				</div>
 			</div>
 			<div id="champ-panel">
 				<div id="champ-top">
-					<span id="champ-left-content">
-						<div>&nbsp;</div>
-						<canvas width="0" height="0"></canvas>
-					</span>
-					<span id="champ-main-img">
+					<div id="champ-floating-top">
+						<span id="champ-left-content">
+							<canvas width="0" height="0"></canvas>
+						</span>
+						<span id="champ-circle">
+							<img id="champ-main-img">
+							<img id="champ-gold-circle">
+						</span>
+						<span id="champ-right-content">
+							<canvas width="0" height="0"></canvas>
+						</span>
+						<div id="champ-select-button"><img></div>
+						<div id="champ-select-window" unselectable="on">
+							<div id="champ-select-area">
+								<div id="champ-select-portraits"></div>
+							</div>
+							<div id="champ-select-bottom">&nbsp;</div>
+							<div id="champ-select-text">Select a Champion</div>
+							<div id="champ-select-close" unselectable="on">x</div>
+							<div class="scrollbar-area" id="champ-scroll">
+								<div class="scrollbar-pos">&nbsp;</div>
+							</div>
+						</div>
+					</div>
+					<div id="champ-tutorial" class="tutorial" style="display: none;">
+						<div id="champ-tutorial-close" class="tutorial-close flipped" unselectable="on">x</div>
 						<img>
-					</span>
-					<span id="champ-right-content">
-						<canvas width="0" height="0"></canvas>
-						<div>&nbsp;</div>
-					</span>
-					<div id="champ-select-button"><img></div>
-					<div id="champ-select-window" unselectable="on">
-						<div id="champ-select-area">
-							<div id="champ-select-portraits"></div>
-						</div>
-						<div id="champ-select-bottom">&nbsp;</div>
-						<div id="champ-select-text">Select a Champion</div>
-						<div id="champ-select-close" unselectable="on">x</div>
-						<div class="scrollbar-area" id="champ-scroll">
-							<div class="scrollbar-pos">&nbsp;</div>
-						</div>
+						<div id="champ-tutorial-info" class="tutorial-info">This is how you use this button.  It is very buttony and very nice.</div>
 					</div>
 				</div>
 				<div id="champ-name"></div>
 				<div id="champ-bot">
-					<p id="champ-winning-item"><img><br>Highest Winning Item</p>
+					<div id="champ-winning-item">
+						<img>
+						<div id="champ-item-desc" style="display: none;"></div>
+						<p>Highest Winning Item</p>
+					</div>
 					<div id="champ-stats-line"></div>
 					<div id="champ-stats-chart"></div>
 				</div>
@@ -88,7 +105,7 @@
 					<div id="misc-scroll-map"><img></div>
 					<div id="map-content">
 						<div id="misc-sr-map"><img>This heatmap shows where the most deaths occured during the event.  The darker the blood, the more deaths.</div>
-						<div id="misc-teemo-killed"><img>18,345 Teemo Deaths</div>
+						<div id="misc-teemo-killed"><img>10,407 Teemo Deaths</div>
 					</div>
 				</div>
 			</div>

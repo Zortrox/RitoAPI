@@ -29,6 +29,46 @@ body {
 	z-index: 10;
 }
 
+.tutorial {
+	position: absolute;
+	background-color: rgb(50,50,50);
+	width: 250px;
+	z-index: 30;
+	border-radius: 5px;
+	box-shadow: 2px 2px 5px #000;
+}
+.tutorial-close {
+	position: absolute;
+	top: 4px;
+	right: 3px;
+	width: 18px;
+	height: 18px;
+	text-align: center;
+	line-height: 15px;
+	-webkit-user-select: none; /* Chrome/Safari */
+	-moz-user-select: none; /* Firefox */
+	-ms-user-select: none; /* IE10+ */
+	background-color: red;
+	border-radius: 50%;
+	cursor: pointer;
+	font-family: sans-serif;
+}
+.tutorial img {
+	position: fixed;
+	height: auto;
+}
+.tutorial-info {
+	padding: 22px 13px 13px 13px;
+}
+.flipped {
+    transform: scale(-1, 1);
+    -moz-transform: scale(-1, 1);
+    -webkit-transform: scale(-1, 1);
+    -o-transform: scale(-1, 1);
+    -khtml-transform: scale(-1, 1);
+    -ms-transform: scale(-1, 1);
+}
+
 .scrollbar-area {
 	position: absolute;
 	width: 6px;
@@ -116,37 +156,6 @@ MAIN PANEL START
 #main-panel{
 
 }
-#chart-tutorial {
-	position: absolute;
-	background-color: rgb(50,50,50);
-	width: 250px;
-	z-index: 30;
-	border-radius: 5px;
-	box-shadow: 2px 2px 5px #000;
-}
-#chart-tutorial-close {
-	position: absolute;
-	top: 4px;
-	right: 3px;
-	width: 18px;
-	height: 18px;
-	text-align: center;
-	line-height: 15px;
-	-webkit-user-select: none; /* Chrome/Safari */
-	-moz-user-select: none; /* Firefox */
-	-ms-user-select: none; /* IE10+ */
-	background-color: red;
-	border-radius: 50%;
-	cursor: pointer;
-	font-family: sans-serif;
-}
-#chart-tutorial img {
-	position: fixed;
-	height: auto;
-}
-#chart-tutorial-info {
-	padding: 22px 13px 13px 13px;
-}
 #main-top-data, #main-brawlers{
 	width: 90%;
 	margin-left: auto;
@@ -166,6 +175,7 @@ MAIN PANEL START
 }
 #chart-slider span {
 	left: 1px;
+	cursor: pointer;
 }
 #time-slider {
 	margin-right: auto;
@@ -175,13 +185,30 @@ MAIN PANEL START
 	color: #A8A8A8;
 	font-size: 14px;
 }
+#time-slider span {
+	cursor: pointer;
+}
 #main-brawlers {
+	position: relative;
 	margin-top: 10px;
 	height: 400px;
 }
 #brawlers-chart {
 	width: 100%;
 	height: 100%;
+}
+#brawler-img {
+	position: absolute;
+	left: 8px;
+	top: 37px;
+	width: 32px;
+}
+#brawler-img img {
+	display: block;
+	border-radius: 3px;
+	width: 32px;
+	height: auto;
+	margin-top: 23px;
 }
 
 /*
@@ -192,6 +219,12 @@ CHAMP PANEL START
 }
 #champ-top {
 	position: relative;
+}
+#champ-floating-top {
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 972px;
 }
 #champ-name {
 	margin-left: auto;
@@ -206,12 +239,15 @@ CHAMP PANEL START
 #champ-name i{
 	font-size: 80%;
 }
+#champ-tutorial {
+
+}
 #champ-bot {
 	position: relative;
 	top: 10px;
 	padding: 20px;
 }
-#champ-main-img {
+#champ-circle {
 	display: inline-block;
 	position: relative;
 	width: 25%;
@@ -219,9 +255,16 @@ CHAMP PANEL START
 	background-color: black;
 	overflow: hidden;
 }
-#champ-main-img img{
+#champ-main-img{
 	display: block;
 	position: absolute;
+	height: auto;
+}
+#champ-gold-circle {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
 	height: auto;
 }
 #champ-left-content {
@@ -229,7 +272,6 @@ CHAMP PANEL START
 	display: inline-block;
 	width: 36%;
 	text-align: right;
-	margin-left: 10px;
 }
 #champ-left-content div {
 	position: absolute;
@@ -341,11 +383,48 @@ CHAMP PANEL START
 	font-family: sans-serif;
 }
 #champ-winning-item {
-	text-align: center;
+	position: relative;
 }
 #champ-winning-item img {
-	float: center;
-	border-radius: 3px;
+	display: block;
+	margin: auto;
+	border-radius: 5px;
+}
+#champ-item-desc {
+	position: absolute;
+	left: 55%;
+	top: 0px;
+	width: 300px;
+	padding: 10px;
+	color: #8A8A8A;
+	background-color: rgba(0, 0, 0, 0.9);
+	border-radius: 5px;
+	border: 2px solid #00AAAA;
+	z-index: 40;
+}
+#champ-item-desc b {
+	color: #DDDDDD
+}
+#champ-item-desc .item-cost {
+	color: #EDE393;
+	font-size: 90%;
+}
+#champ-item-desc .item-stats {
+	color: #33AAAA;
+}
+#champ-item-desc .item-unique {
+	color: #F2D600;
+}
+#champ-item-desc .item-active {
+	color: #FA8500;
+}
+#champ-item-desc .item-text {
+	font-size: 90%;
+	color: #BBBBBB;
+}
+#champ-winning-item p {
+	margin: 0;
+	text-align: center;
 }
 #champ-stats-line {
 	width: 80%;

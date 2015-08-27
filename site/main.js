@@ -18,15 +18,22 @@ var loadingMoreDef = $.Deferred();	//resolves/rejects downtime loading
 var champData = null;	//converted JSON object
 var champIDList = [];	//sorted champ IDs by champ name
 var timeData = null;
-var tutNumber = 2;
+var champStats = null;	//champ stats (kill, assist, gold, etc);
+var itemData = null;	//item data (stats, etc.)
+var currentChampID = 0;
+var mainTutNumber = 2;		//number of tutorials (on main page)
+var champTutNumber = 3;		//number of tutorials (on champ page)
 var champScrollbar = null;
 var currentChampX = 0;
 var currentChampY = 0;
 var currentChampZoom = .6;
 var champPortraitWidth = 1215;
 var champPortraitHeight = 717;
+var waveSeconds = 0;
+var waveT = 0;
+var mouseCanvasLeft = {x:0, y:0};		//mouse position on left canvas
+var mouseCanvasRight = {x:1000, y:0};	//mouse position on right canvas
 var doCoinAnim = false;
-
 var hasLoadedMain = false;
 var hasLoadedChamp = false;
 var hasLoadedMisc = false;
@@ -91,9 +98,8 @@ var resizeMainPage = function() {
 	//main page resizing
 }
 var resizeChampPage = function(offsetX, offsetY, zoom) {
-	var width = $(window).width();
-	var circleWidth = $("#champ-main-img").width();
-	var ratio = width/champPortraitWidth;
+	var circleWidth = $("#champ-circle").width();
+	var ratio = (circleWidth * 5)/champPortraitWidth;
 
 	if (offsetX != null) {
 		currentChampX = offsetX;
@@ -105,13 +111,13 @@ var resizeChampPage = function(offsetX, offsetY, zoom) {
 		currentChampZoom = zoom;
 	}
 
-	$("#champ-main-img").height(circleWidth);
+	$("#champ-circle").height(circleWidth);
 	$("#champ-left-content canvas")[0].height = circleWidth;
 	$("#champ-left-content canvas")[0].width = $("#champ-left-content").width();
 	$("#champ-right-content canvas")[0].height = circleWidth;
 	$("#champ-right-content canvas")[0].width = $("#champ-right-content").width();
-	$("#champ-main-img img").css({
-		"width": $(window).width() * currentChampZoom,
+	$("#champ-main-img").css({
+		"width": circleWidth * 5 * currentChampZoom,
 		"margin-left": -(currentChampX * ratio * currentChampZoom - circleWidth/2),
 		"margin-top": -(currentChampY * ratio * currentChampZoom - circleWidth/2),
 	});
@@ -119,9 +125,6 @@ var resizeChampPage = function(offsetX, offsetY, zoom) {
 	if ( $("champ-select-window").css("display") != "none") {
 		champScrollbar.getSizes();
 	}
-
-	drawPickBanChart();
-	drawWinRateChart();
 }
 var resizeMiscPage = function() {
 	var width = $("#misc-map-width").width();
@@ -271,31 +274,31 @@ var sortChampList = function() {
 	});
 }
 function createCookie(name, value, days) {
-    var expires;
+	var expires;
 
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toGMTString();
-    } else {
-        expires = "";
-    }
-    document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+	if (days) {
+		var date = new Date();
+		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		expires = "; expires=" + date.toGMTString();
+	} else {
+		expires = "";
+	}
+	document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
 }
 
 function readCookie(name) {
-    var nameEQ = encodeURIComponent(name) + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
-    }
-    return null;
+	var nameEQ = encodeURIComponent(name) + "=";
+	var ca = document.cookie.split(';');
+	for (var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+		if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+	}
+	return null;
 }
 
 function eraseCookie(name) {
-    createCookie(name, "", -1);
+	createCookie(name, "", -1);
 }
 
 /*|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -363,12 +366,15 @@ var showPanel = function(page) {
 	$("#all-panel").animate({"opacity": 1.0},
 		{duration: 500, queue: false, easing: "linear", complete: function() {
 			//finished showing current page
-			if (page == pageName.MAIN && readCookie("tutorialDone") == null) {
+			if (page == pageName.MAIN && readCookie("mainTutorialDone") == null) {
 				//show chart tutorial
-				createCookie("tutorialDone", "true", 1);
-				animateTutorial();
-			}
-			if (page == pageName.MISC) {
+				createCookie("mainTutorialDone", "true", 1);
+				animateMainTutorial();
+			} else if (page == pageName.CHAMP && readCookie("champTutorialDone") == null) {
+				//show chart tutorial
+				createCookie("champTutorialDone", "true", 1);
+				animateChampTutorial();
+			} else if (page == pageName.MISC) {
 				animateMap();
 			}
 		}});
@@ -389,7 +395,7 @@ var loadMainPanel = function() {
 
 	if (!hasLoadedMain) {
 		proms.push(createMainChart());
-		createBrawlersChart();
+		proms.push(createBrawlersChart());
 		hasLoadedMain = true;
 	}
 
@@ -576,14 +582,12 @@ var createMainChart = function() {
 	});
 	proms.push(tutProm);
 	$("#chart-tutorial-close").click(function() {
-		if (tutNumber == 0){
+		if (mainTutNumber == 0){
 			$("#chart-tutorial").hide();
 		} else {
-			animateTutorial();
+			animateMainTutorial();
 		}
 	});
-
-
 
 	return $.when.apply($, proms).then(function() {
 		//set time data into chart
@@ -637,6 +641,8 @@ var loadTimeData = function() {
 	return dfd.promise();
 }
 var createBrawlersChart = function() {
+	var proms = [];
+
 	var brawlerData = [{
 		name: "Buy Rate",
 		color: "#FFD900",
@@ -651,6 +657,7 @@ var createBrawlersChart = function() {
 		chart: {
 			type: "bar",
 			backgroundColor: "transparent",
+			marginLeft: 137
 		},
 		xAxis: {
 			categories: ["Razorfin", "Ironback", "Plundercrab", "Ocklepod", "None Bought"]
@@ -665,7 +672,7 @@ var createBrawlersChart = function() {
 			title: {
 				text: null
 			},
-			tickInterval: 50
+			tickInterval: 50,
 		},
 		title: {
 			text: "Brawler Win Rate & Buy Rate",
@@ -688,16 +695,24 @@ var createBrawlersChart = function() {
 			}
 		}
 	});
+
+	proms.push(loadSource($("#brawler-img-rf"), "http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/3611.png"));
+	proms.push(loadSource($("#brawler-img-ib"), "http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/3612.png"));
+	proms.push(loadSource($("#brawler-img-pc"), "http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/3613.png"));
+	proms.push(loadSource($("#brawler-img-op"), "http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/3614.png"));
+	proms.push(loadSource($("#brawler-img-none"), "img/brawler-none.jpg"));
+
+	return $.when.apply($, proms);
 }
-var animateTutorial = function() {
+var animateMainTutorial = function() {
 	$("#chart-tutorial").show();
 
 	var elemLink;
 	var infoText;
-	if (tutNumber == 1) {
+	if (mainTutNumber == 1) {
 		elemLink = $("#time-slider span");
 		infoText = "This slider changes the graph data to show the win rate and pick rate times.";
-	} else if (tutNumber == 2) {
+	} else if (mainTutNumber == 2) {
 		elemLink = $("#chart-slider span");
 		infoText = "This switch changes the graph from \"Win Rate\" to \"Pick Rate\".";
 	}
@@ -716,7 +731,7 @@ var animateTutorial = function() {
 	});
 	$("#chart-tutorial-info").text(infoText);
 
-	tutNumber--;
+	mainTutNumber--;
 }
 
 /*|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -725,11 +740,58 @@ CHAMP PANEL FUNCTIONS
 var loadChampPanel = function() {
 	var proms = []
 
-	proms.push(createChampWindow());
-	drawPickBanChart();
-	drawWinRateChart();
+	jsonProms = [loadStatsData(), loadItemData()];
+
+	proms.push(
+		$.when.apply($, jsonProms).then(function() {
+			createChampWindow();
+	}));
 
 	return $.when.apply($, proms);
+}
+var loadStatsData = function() {
+	var dfd = $.Deferred();
+
+	$.ajax({
+		'async': true,
+		'global': false,
+		'url': "champStats.json",
+		'dataType': "json",
+		'success': function (data) {
+			champStats = data.info;
+			organizeChampStats();
+			dfd.resolve();
+		},
+	});
+
+	return dfd.promise();
+}
+var organizeChampStats = function() {
+	//creates objects to be able to recall data
+	var tempData = {};
+
+	$.each(champStats, function(i, value) {
+		var champID = value.championId;
+		tempData[champID.toString()] = value;
+	});
+
+	champStats = tempData;
+}
+var loadItemData = function() {
+	var dfd = $.Deferred();
+
+	$.ajax({
+		'async': true,
+		'global': false,
+		'url': "itemData.json",
+		'dataType': "json",
+		'success': function (data) {
+			itemData = data.data;
+			dfd.resolve();
+		},
+	});
+
+	return dfd.promise();
 }
 function Scrollbar() {
 	var self = this;
@@ -753,14 +815,17 @@ var closeChampWindow = function() {
 	$("#champ-select-button").show();
 }
 var loadNewChamp = function(champ) {
-	//TODO: this function
-	//spin champion main portrait
-	//blank, gray, or mark out data
 	var proms = [];
+	currentChampID = champ.id;
 
-	$("#champ-main-img img").hide();
-	$("#champ-name").html("");
-	var imgProm = loadSource($("#champ-main-img img"),
+	//remove and hide previous champ info
+	$("#champ-main-img").hide();
+	$("#champ-name").html("<b>nbsp;</b><br><i>nbsp;</i>");
+	$("#champ-winning-item img").attr("src", "img/item-black.jpg");
+	if (hasLoadedChamp) { changeChampStats(true); }
+
+	//load new info
+	var imgProm = loadSource($("#champ-main-img"),
 		"http://ddragon.leagueoflegends.com/cdn/img/champion/splash/" + 
 		champ.key + "_0.jpg");
 	imgProm.done(function(){
@@ -770,27 +835,95 @@ var loadNewChamp = function(champ) {
 		resizeChampPage(x, y, zoom);
 	});
 	proms.push(imgProm);
-
 	proms.push(loadSource($("#champ-winning-item img"),
-		"http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/" + 3612 + ".png"));
+		"http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/" +
+		champStats[currentChampID].bestItem + ".png"));
+
+	//load new item info
+	var itemObj = itemData[champStats[currentChampID].bestItem];
+	var innerHTML = "";
+	innerHTML += "<b>" + itemObj.name + "</b><br>";
+	innerHTML += "<span class=\"item-cost\">Cost: " + itemObj.gold.total + "</span><br><br>";
+	var itemDesc = itemObj.description.replace("<stats>", "<span class=\"item-stats\">").replace(
+		"</stats>", "</span>").replace("<unique>", "<span class=\"item-unique\">").replace(
+		"</unique>", "</span>").replace("<active>", "<span class=\"item-active\">").replace("</active>", "</span>");
+	innerHTML += itemDesc + "<br><br>";
+	innerHTML += "<i class=\"item-text\">" + itemObj.plaintext + "</i>";
+	$("#champ-item-desc").html(innerHTML);
 
 
 	return $.when.apply($, proms).then(function() {
-		//TODO:
-		//remove spinning wheel
 		//add data to page and show
-		$("#champ-main-img img").show();
+		if (hasLoadedChamp) { changeChampStats(); }
+		$("#champ-main-img").show();
 		$("#champ-name").html("<b>" + champ.name + "</b><br><i>" + champ.title + "</i>");
 
 	})
+}
+var changeChampStats = function(removeStats) {
+	if (removeStats) {
+		//clear bar charts to 0
+		for (var i=0; i<7; i++) {
+			createStatsChart($("#champ-stats-" + i), i, [ 0, 0 ]);
+		}
+	} else {
+		var props = ["Kills", "Deaths", "Assist", "GoldEarned", "MinionsKilled", "TowerKills", "WardsPlaced"];
+		//add new data to bar charts
+		for (var i=0; i<7; i++) {
+			createStatsChart($("#champ-stats-" + i), i, [ champStats[currentChampID]["Avg"+props[i]],
+				champStats[currentChampID]["Max"+props[i]] ]);
+		}
+	}
+}
+var animateChampTutorial = function() {
+	$("#champ-tutorial").show();
+
+	var elemLink;
+	var infoText;
+	var imgOffset;
+	var infoOffset;
+	if (champTutNumber == 1) {
+		elemLink = $("#champ-select-button img");
+		infoText = "You can change champions with this button here.";
+		loadSource($("#champ-tutorial img"), "img/tut-circle.png");
+		$("#champ-tutorial img").width(48);
+		elemOffset = {top: -12, left: -12};
+		infoOffset = {top: 0, left: -270};
+	} else if (champTutNumber == 2) {
+		elemLink = $("#champ-right-content");
+		infoText = "Hovering on this graph shows the current champ's win rate with and without the Black Market items.";
+		elemOffset = {top: 100, left: -80};
+		infoOffset = {top: 100, left: -330};
+		$("#champ-tutorial img").removeClass("flipped");
+	} else if (champTutNumber == 3) {
+		elemLink = $("#champ-left-content");
+		infoText = "Hover over the graph to see each champ's total pick rate and ban rate.";
+		elemOffset = {top: 100, left: 250};
+		infoOffset = {top: 100, left: 400};
+		$("#champ-tutorial img").addClass("flipped");
+	}
+
+	$("#champ-tutorial img").offset(function(){
+		var width = $("#champ-tutorial img").width();
+		var oLeft = elemLink.offset().left + elemOffset.left;
+		var oTop = elemLink.offset().top + elemOffset.top;
+		return {left: oLeft, top: oTop};
+	});
+	$("#champ-tutorial").offset(function(){
+		var height = $("#champ-tutorial").height();
+		var oLeft = elemLink.offset().left + infoOffset.left;
+		var oTop = elemLink.offset().top + infoOffset.top;
+		return {left: oLeft, top: oTop};
+	});
+	$("#champ-tutorial-info").text(infoText);
+
+	champTutNumber--;
 }
 var createChampWindow = function() {
 	var proms = [];
 
 	//load basic data only once
 	if (!hasLoadedChamp) {
-		hasLoadedChamp = true;
-
 		$("#champ-select-window").hide();
 		$("#champ-select-button").click(function(){
 			$("#champ-select-window").show();
@@ -802,7 +935,11 @@ var createChampWindow = function() {
 		});
 
 		proms.push(loadSource($("#champ-select-button img"), "http://ddragon.leagueoflegends.com/cdn/5.2.1/img/ui/champion.png"));
-	
+		proms.push(loadSource($("#champ-winning-item img"), "img/item-black.jpg"));
+
+		//create stats divs
+		createChampDivs();
+
 		//set first random champion
 		var randID = Math.floor(Math.random() * champIDList.length);
 		proms.push(loadNewChamp(champData[champIDList[randID]]));
@@ -816,7 +953,45 @@ var createChampWindow = function() {
 			$("#champ-scroll .scrollbar-pos").css("top", top);
 		});
 
-		createChampCharts();
+		proms.push(loadSource($("#champ-gold-circle"), "img/champ-circle.png"));
+
+		//create side graphs
+		drawChampSideCharts();
+		$("#champ-left-content canvas").mousemove(function(evt) {
+			mouseCanvasLeft = getMousePos($("#champ-left-content canvas")[0], evt);
+		});
+		$("#champ-left-content canvas").mouseout(function(evt) {
+			mouseCanvasLeft = {x: 0, y:0};
+		});
+		$("#champ-right-content canvas").mousemove(function(evt) {
+			mouseCanvasRight = getMousePos($("#champ-right-content canvas")[0], evt);
+		});
+		$("#champ-right-content canvas").mouseout(function(evt) {
+			mouseCanvasRight = {x: $("#champ-right-content canvas").width(), y: 0};
+		});
+
+		//set up tutorial
+		tutProm = loadSource($("#champ-tutorial img"), "img/tut-arrow.png");
+		tutProm.done(function() {
+			//$("#champ-tutorial img").width($("#champ-slider span").width() * 3);
+		});
+		proms.push(tutProm);
+		$("#champ-tutorial-close").click(function() {
+			if (champTutNumber == 0){
+				$("#champ-tutorial").hide();
+			} else {
+				animateChampTutorial();
+			}
+		});
+
+		//set up hover window
+		$("#champ-winning-item img").hover(function() {
+			$("#champ-item-desc").show();
+		}, function() {
+			$("#champ-item-desc").hide();
+		});
+
+		hasLoadedChamp = true;
 	}
 
 	//add custom grid of champions to elem
@@ -900,103 +1075,207 @@ var asyncLoop = function(iterations, currentIter, func, callback) {
 	loop.next();
 	return loop;
 }
-var drawPickBanChart = function() {
+var drawChampSideCharts = function() {
+	//----------------------------------------------
+	//FIRST CANVAS
+	//----------------------------------------------
 	var ctx = $("#champ-left-content canvas")[0].getContext("2d");
 	var width = $("#champ-left-content").width();
 	var height = $("#champ-left-content").height();
-	var thickness = 50;
 	var centerX = width + width/3;
+	var thickness = width * .156;
+	var data = [champStats[currentChampID].pickRate / 100,
+		champStats[currentChampID].banRate / 100];			//pick rate, ban rate
+
+	//clear the screen (also stops the lagging)
+	$("#champ-left-content canvas")[0].width = width;
 
 	//create clip mask
+	ctx.save();
 	ctx.beginPath();
 	ctx.arc(centerX, height/2, width/2, toRad(223), toRad(137), true);
 	ctx.arc(centerX - thickness, height/2, width/2, toRad(137), toRad(223), false);
-	ctx.closePath()
+	ctx.closePath();
 	ctx.clip();
 
 	//draw data
-	var data = [.3, .25];	//pick rate, ban rate
-	ctx.fillStyle = "#777777";
-	ctx.fillRect(width/2, 0, width, height);
-	ctx.fillStyle = "#AD0A0A";
-	ctx.fillRect(width/2, height * (1 - (data[0] + data[1])), width, height);
-	ctx.fillStyle = "#007D19";
-	ctx.fillRect(width/2, height  * (1 - data[0]), width, height);
+	ctx.fillStyle = "#ABACFF";
+	ctx.globalAlpha = 0.5;
+	drawWave(ctx, height * (1 - (data[0] + data[1])), width, height, 0, false);
+	ctx.fillStyle = "#000833";
+	ctx.globalAlpha = 0.7;
+	drawWave(ctx, height  * (1 - data[0]), width, height, 3*Math.PI/4, false);
+	ctx.globalAlpha = 1.0;
 
 	//draw border (helps antialias)
-	ctx.strokeStyle = "#000000";
-	ctx.lineWidth = 3;
+	ctx.restore();
+	ctx.strokeStyle = "#514222";
+	ctx.lineWidth = 5;
 	ctx.beginPath();
 	ctx.arc(centerX, height/2, width/2, toRad(223), toRad(137), true);
 	ctx.arc(centerX - thickness, height/2, width/2, toRad(137), toRad(223), false);
-	ctx.closePath()
+	ctx.closePath();
 	ctx.stroke();
-}
-var drawWinRateChart = function() {
-	var ctx = $("#champ-right-content canvas")[0].getContext("2d");
-	var rad = $("#champ-main-img").width();
-	var width = $("#champ-right-content").width();
-	var height = $("#champ-right-content").height();
-	var thickness = 50;
-	var centerX = -width/3;
+
+	//draw text if mouse is over chart
+	if (mouseCanvasLeft.x >= width * 0.667) {
+		ctx.font = "13px Lucida Grande, Lucida Sans Unicode, Arial, Helvetica, sans-serif";
+		ctx.textAlign = "right";
+		ctx.fillStyle = "#8A8A8A";
+
+		var nonHeight = height * (1 - (data[0] + data[1])) / 2;
+		if (nonHeight < 13) {nonHeight = 13;}
+		var nonPicked = 100.0 - (parseFloat(champStats[currentChampID].banRate) +
+			parseFloat(champStats[currentChampID].pickRate));
+		nonPicked = Math.round(nonPicked * 100) / 100;
+		ctx.fillText("Untouched Rate: " + nonPicked + "%", width * 0.667 - 5, nonHeight);
+
+		var pickHeight = height * (1 - data[0]) + 13;
+		if (pickHeight > height) {pickHeight = height;}
+		ctx.fillText("Pick Rate: " + champStats[currentChampID].pickRate + "%",
+			width * 0.667 - 5, pickHeight);
+
+		var banHeight = height * (1 - (data[0] + data[1])) + 13;
+		if (banHeight > pickHeight - 15) {banHeight = pickHeight - 15;}
+		ctx.fillText("Ban Rate: " + champStats[currentChampID].banRate + "%",
+			width * 0.667 - 5, banHeight);
+	}
+
+	//----------------------------------------------
+	//SECOND CANVAS
+	//----------------------------------------------
+	ctx = $("#champ-right-content canvas")[0].getContext("2d");
+	width = $("#champ-right-content").width();
+	height = $("#champ-right-content").height();
+	centerX = -width/3;
+	thickness = width * .156;
+	data = [champStats[currentChampID].winWithItems / 100,
+		champStats[currentChampID].winWithoutItems / 100];	//winrate, winrate where bought item
+
+	//clear the screen (also stops the lagging)
+	$("#champ-right-content canvas")[0].width = width;
 
 	//create clip mask
+	ctx.save();
 	ctx.beginPath();
 	ctx.arc(centerX + thickness, height/2, width/2, toRad(43), toRad(-43), true);
 	ctx.arc(centerX, height/2, width/2, toRad(-43), toRad(43), false);
-	ctx.closePath()
+	ctx.closePath();
 	ctx.clip();
 
 	//draw data
-	var data = [.7];	//just winrate with item
-	ctx.fillStyle = "#70538C";
-	ctx.fillRect(0, 0, width/2, height);
-	ctx.fillStyle = "#49A5C9";
-	ctx.fillRect(0, height * (1 - data[0]), width/2, height);
-	
+	ctx.fillStyle = "#ABACFF";
+	ctx.globalAlpha = 0.5;
+	drawWave(ctx, height * (1 - (data[0] + data[1])), width, height, 0, true);
+	ctx.fillStyle = "#000833";
+	ctx.globalAlpha = 0.7;
+	drawWave(ctx, height  * (1 - data[0]), width, height, 3*Math.PI/4, true);
+	ctx.globalAlpha = 1.0;
 
 	//draw border (helps antialias)
-	ctx.strokeStyle = "#000000";
-	ctx.lineWidth = 3;
+	ctx.restore();
+	ctx.strokeStyle = "#514222";
+	ctx.lineWidth = 5;
 	ctx.beginPath();
 	ctx.arc(centerX + thickness, height/2, width/2, toRad(43), toRad(-43), true);
 	ctx.arc(centerX, height/2, width/2, toRad(-43), toRad(43), false);
-	ctx.closePath()
+	ctx.closePath();
+	ctx.stroke();
+
+		//draw text if mouse is over chart
+	if (mouseCanvasRight.x <= width * .333) {
+		ctx.font = "13px Lucida Grande, Lucida Sans Unicode, Arial, Helvetica, sans-serif";
+		ctx.textAlign = "left";
+		ctx.fillStyle = "#8A8A8A";
+
+		var nonHeight = height * (1 - (data[0] + data[1])) / 2;
+		if (nonHeight < 13) {nonHeight = 13;}
+		var nonPicked = 100.0 - (parseFloat(champStats[currentChampID].winWithItems) +
+			parseFloat(champStats[currentChampID].winWithoutItems));
+		nonPicked = Math.round(nonPicked * 100) / 100;
+		ctx.fillText(nonPicked + "%: Loss Rate", width * 0.333 + 5, nonHeight);
+
+		var pickHeight = height * (1 - data[0]) + 13;
+		if (pickHeight > height) {pickHeight = height;}
+		ctx.fillText(champStats[currentChampID].winWithItems + "%: Win % w/ BMB Items",
+			width * 0.333 + 5, pickHeight);
+
+		var banHeight = height * (1 - (data[0] + data[1])) + 13;
+		if (banHeight > height - 15) {banHeight = height - 15;}
+		ctx.fillText(champStats[currentChampID].winWithoutItems + "%: Win % w/o BMB Items",
+			width * 0.333 + 5, banHeight);
+	}
+
+	//move the "waves"
+	waveT += 0.07;
+
+	setTimeout(drawChampSideCharts, 1000/30);
+}
+var drawWave = function(ctx, top, width, height, xOffset, rightSide) {
+	var x = waveT;
+	var y = Math.sin(x);
+	var unit = 20;
+
+	var startX = width * .667;
+	var endX = width;
+	if (rightSide) {
+		startX = 0;
+		endX = width*.333;
+	}
+
+	// draw sin curve
+	ctx.beginPath();
+	ctx.lineWidth = 1;
+	ctx.moveTo(startX, unit*y+top);
+	for (i = startX; i <= endX; i += 5) {
+		x = waveT+(-startX+i) / unit;
+		y = Math.sin(x + xOffset) / 16;	//11
+		ctx.lineTo(i, unit*y+top);
+	}
+	ctx.lineTo(endX, height);
+	ctx.lineTo(startX, height);
+	ctx.closePath();
+	ctx.fill();
 	ctx.stroke();
 }
 var toRad = function(degrees) {
 	return degrees * (Math.PI/180);
 }
-var createChampCharts = function() {
+function getMousePos(canvas, evt) {
+	var rect = canvas.getBoundingClientRect();
+	return {
+		x: evt.clientX - rect.left,
+		y: evt.clientY - rect.top
+	};
+}
+var createChampDivs = function() {
 	for (var i=0; i<7; i++) {
 		$("#champ-stats-chart").append("<div id=\"champ-stats-" + i + "\"></div>")
-		createStatsChart($("#champ-stats-" + i), i);
 	}
 }
-var createStatsChart = function(elem, chartNum) {
-	var data = [[12, 18], [5, 20], [10, 50], [15000, 60000], [180, 650], [3, 8], [6, 45]];
+var createStatsChart = function(elem, chartNum, stats) {
 	var cats = ["Kills", "Deaths", "Assists", "Gold Earned", "Minion Kills", "Tower Kills", "Wards Placed"];
 
-	var chartHeight = 138;
-	if (chartNum > 0 && chartNum < data.length - 1) {
-		chartHeight = 100;
+	var chartHeight = 100;
+	if (chartNum > 0 && chartNum < cats.length - 1) {
+		chartHeight -= 38;
 	}
 
 	var legendShow = false;
-	if (chartNum == data.length - 1) {
+	if (chartNum == cats.length - 1) {
 		legendShow = true;
 	};
 
 	var statsData = [{
 		name: "Average",
-		color: "#FFD900",
-		data: [data[chartNum][0]],
+		color: "#2993CC",
+		data: [parseFloat(stats[0])],
 		showInLegend: legendShow,
 		legendIndex: 1
 	}, {
 		name: "Max",
-		color: "#0074E8",
-		data: [data[chartNum][1]],
+		color: "#E36F22",
+		data: [parseFloat(stats[1])],
 		showInLegend: legendShow,
 		legendIndex: 0
 	}];
@@ -1012,13 +1291,21 @@ var createStatsChart = function(elem, chartNum) {
 		}
 	}
 
+	var chartOptions = {
+		type: "bar",
+		backgroundColor: "transparent",
+		height: chartHeight,
+		marginLeft: 85,
+	}
+	if (chartNum > 0) {
+		chartOptions.marginTop = 0;
+	}
+	if (chartNum < cats.length - 1) {
+		chartOptions.marginBottom = 0;
+	}
+
 	elem.highcharts({
-		chart: {
-			type: "bar",
-			backgroundColor: "transparent",
-			height: chartHeight,
-			marginLeft: 85
-		},
+		chart: chartOptions,
 		xAxis: {
 			categories: [cats[chartNum]],
 		},
@@ -1037,7 +1324,16 @@ var createStatsChart = function(elem, chartNum) {
 			enabled: false
 		},
 		tooltip: {
-			shared: true,
+			formatter: function() {
+				var s = '<b>'+ this.x +'</b>';
+
+				$.each(this.points.reverse(), function(i, point) {
+					s += '<br/><span style="color:'+ point.series.color +'">\u25CF</span>: ' + point.series.name + ': ' + point.y;
+				});
+
+				return s;
+			},
+			shared: true
 		},
 		series: statsData,
 		plotOptions: {
