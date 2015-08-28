@@ -517,11 +517,21 @@ MISC PANEL START
 }
 #misc-teemo-killed {
 	position: absolute;
-	bottom: 30px;
-	right: 30px;
+	bottom: 5%;
+	right: 3%;
 	width: 15%;
 }
 #misc-teemo-killed img {
+	width: 100%;
+	height: auto;
+}
+#misc-fifty-percent {
+	position: absolute;
+	bottom: 20px;
+	left: 35%;
+	width: 35%;
+}
+#misc-fifty-percent img{
 	width: 100%;
 	height: auto;
 }

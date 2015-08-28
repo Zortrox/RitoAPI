@@ -685,6 +685,16 @@ var createBrawlersChart = function() {
 			enabled: false
 		},
 		tooltip: {
+			formatter: function() {
+				var s = '<b>'+ this.x +'</b>';
+
+				$.each(this.points.reverse(), function(i, point) {
+					s += '<br/><span style="color:'+ point.series.color +'">\u25CF</span>: ' +
+						point.series.name + ': ' + point.y + "%";
+				});
+
+				return s;
+			},
 			shared: true,
 			valueSuffix: "%"
 		},
@@ -1369,6 +1379,7 @@ var createMiscMap = function() {
 	proms.push(loadSource($("#misc-map audio"), "snd/mapunroll.mp3"));
 	proms.push(loadSource($("#misc-scroll-map img"), "img/parchment16x9.jpg"));
 	proms.push(loadSource($("#misc-teemo-killed img"), "img/teemo-killed.png"));
+	proms.push(loadSource($("#misc-fifty-percent img"), "img/50-percent.png"))
 
 	return $.when.apply($, proms).then(function() {
 		$("#misc-map-overlay img").attr("src", "img/parchment16x9.jpg");
