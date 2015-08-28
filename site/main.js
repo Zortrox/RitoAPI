@@ -833,6 +833,7 @@ var loadNewChamp = function(champ) {
 	$("#champ-name").html("<b>nbsp;</b><br><i>nbsp;</i>");
 	$("#champ-winning-item img").attr("src", "img/item-black.jpg");
 	if (hasLoadedChamp) { changeChampStats(true); }
+	$("#champ-item-desc").html("");
 
 	//load new info
 	var imgProm = loadSource($("#champ-main-img"),
@@ -845,21 +846,25 @@ var loadNewChamp = function(champ) {
 		resizeChampPage(x, y, zoom);
 	});
 	proms.push(imgProm);
-	proms.push(loadSource($("#champ-winning-item img"),
-		"http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/" +
-		champStats[currentChampID].bestItem + ".png"));
 
 	//load new item info
 	var itemObj = itemData[champStats[currentChampID].bestItem];
 	var innerHTML = "";
-	innerHTML += "<b>" + itemObj.name + "</b><br>";
-	innerHTML += "<span class=\"item-cost\">Cost: " + itemObj.gold.total + "</span><br><br>";
-	var itemDesc = itemObj.description.replace("<stats>", "<span class=\"item-stats\">").replace(
-		"</stats>", "</span>").replace("<unique>", "<span class=\"item-unique\">").replace(
-		"</unique>", "</span>").replace("<active>", "<span class=\"item-active\">").replace("</active>", "</span>");
-	innerHTML += itemDesc + "<br><br>";
-	innerHTML += "<i class=\"item-text\">" + itemObj.plaintext + "</i>";
-	$("#champ-item-desc").html(innerHTML);
+	if (itemObj != null) {
+		innerHTML += "<b>" + itemObj.name + "</b><br>";
+		innerHTML += "<span class=\"item-cost\">Cost: " + itemObj.gold.total + "</span><br><br>";
+		var itemDesc = itemObj.description.replace("<stats>", "<span class=\"item-stats\">").replace(
+			"</stats>", "</span>").replace("<unique>", "<span class=\"item-unique\">").replace(
+			"</unique>", "</span>").replace("<active>", "<span class=\"item-active\">").replace("</active>", "</span>");
+		innerHTML += itemDesc + "<br><br>";
+		innerHTML += "<i class=\"item-text\">" + itemObj.plaintext + "</i>";
+		$("#champ-item-desc").html(innerHTML);
+		proms.push(loadSource($("#champ-winning-item img"),
+		"http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/" +
+		champStats[currentChampID].bestItem + ".png"));
+	} else {
+		$("#champ-item-desc").html("Gangplank was dead, so he had no favorite item.");
+	}
 
 
 	return $.when.apply($, proms).then(function() {
