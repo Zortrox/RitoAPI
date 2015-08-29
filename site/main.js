@@ -1385,6 +1385,7 @@ var createMiscMap = function() {
 	proms.push(loadSource($("#misc-scroll-map img"), "img/parchment16x9.jpg"));
 	proms.push(loadSource($("#misc-teemo-killed img"), "img/teemo-killed.png"));
 	proms.push(loadSource($("#misc-fifty-percent img"), "img/50-percent.png"))
+	proms.push(loadSource($("#misc-twenty-minute img"), "img/20-min-surr.png"))
 
 	return $.when.apply($, proms).then(function() {
 		$("#misc-map-overlay img").attr("src", "img/parchment16x9.jpg");

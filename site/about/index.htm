@@ -9,15 +9,32 @@
 		<a href="../"><div>Back</div></a>
 	</div>
 	<div id="wrapper">
-		<p>
-			This is an about page showing lots of cool stuff.
-		</p>
-		<p>
-			This tells about the two developers and what they do.
-		</p>
-		<p>
-			This tells how they made the site.
-		</p>
+		<div>
+			<h2>The Project</h2>
+			<h4>Data</h4>
+			<p>
+				This site uses data from 100,000 Black Market Brawlers games spread out from the North America, EU Nordic & East, EU West, Latin America North, Latin America South, Oceania, Turkey, Russia, and Korea regions.
+			</p>
+			<p>
+			<img class="img-right" src="../img/heatmap-base.png">
+			This is the base image for the kill heatmap.  This image was then scaled and overlaid onto the Summoner's Rift map.</p>
+
+			<h4>Site</h4>
+			<p>The site uses Highcharts for all graph displays except the curved bars around the champion portrait. JQuery UI was used to make some nice sliders on the first page and the loading coin animation. There were a few large hurdles to cross when developing the site.  The first was having an asynchronous loader for every image + another loader for each champion portrait in the champ select window. The second and third challenges were creating the curved bars on the Champ page and creating the unrolling parchment on the Other Stats page.</p>
+			<p>
+			<img class="img-left" src="../img/async-code.png">
+			Browsers naturally load images asynchronously, so that part was easy.  The hard part was determining what to load and what media the user needs to see immediately.  Once the page loads the DOM elements (HTML), CSS, JavaScript, and coin images (front and back), the page shows the spinning coin animation.  While those are being downloaded, the large background image is too, but the site waits until all elements (JSON files, images, audio) on the current page are loaded before the page is allowed to show.  This gives the users a nice flow between pages while still showing that data is being loaded if they are on a slow connection.  The second part of this challenge involved loading all 126 champion portraits from Riot's Data Dragon service.  An asynchronous looping function (shown in image) was created to start loading images as soon as the client wasn't busy loading anything else, and it would stop when another page with more content was needing to be loaded.  The "function" parameter added a &lt;span&gt; element to the champ select window and loaded the source image in that &lt;span&gt;.  The "callback" function resolved a jQuery Deferred object that lets the non-asynchronous JavaScript know that the images were finished loading. This allows the page to display and sets a flag to not call the looping function anymore.</p>
+			<p>The second challenge was creating the curved bars that show champion pick, ban, and untouched rate as well as the win rate with/without the new Black Market items in this game mode.  The bars are contained in two canvas elements (one on each side of the main portrait) that update ~30FPS.  Each bar first saves the current context state then creates a curved clip area so all future canvas drawings are contained to that curved area.  Next, the canvas calculates the height needed for each wave-bar and draws a small sine-wave (with small offsets) for each bar to simulate water movement.  Then the canvas context is restored to its saved, unclipped state so it can draw the outlines and data on hover.</p>
+			<p>
+			<img class="img-right" src="../img/map-comparison.png">
+			The last challenge was on the Other Stats page: the parchment unroll animation.  This animation is drawn solely with DOM elements (i.e. no canvas/drawing functions) along with CSS overlays and a few jQuery movement animations.  Basically, another parchment texture is laid over the main texture, but this one has a parent that hides all overflow.  This parent has two siblings that control the shadows and highlights on the map to add a cylindrical effect to the parchment.  As soon as the page is loaded and displayed, the overlaid parchment and its parent move to the right while the main parent element shrinks its width and an &lt;audio&gt; element plays the parchment sound.  There you go, magic gone.</p>
+		</div>
+		<div>
+			<h2>The Team</h2>
+			<p>
+				The team that processed the data and created the site is composed of Jon Stirling and Matthew Clark.  They're pretty cool.
+			</p>
+		</div>
 	</div>
 </body>
 </html>
