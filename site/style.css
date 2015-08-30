@@ -503,6 +503,10 @@ MISC PANEL START
 	font-weight: bold;
 	font-family: "Gloria Hallelujah", cursive;
 }
+#map-content img {
+	width: 100%;
+	height: auto;
+}
 #misc-sr-map {
 	width: 30%;
 	float: left;
@@ -512,8 +516,6 @@ MISC PANEL START
 #misc-sr-map img{
 	display: block;
 	position: relative;
-	width: 100%;
-	height: auto;
 }
 #misc-teemo-killed {
 	position: absolute;
@@ -521,27 +523,32 @@ MISC PANEL START
 	right: 3%;
 	width: 15%;
 }
-#misc-teemo-killed img {
-	width: 100%;
-	height: auto;
-}
 #misc-fifty-percent {
 	position: absolute;
 	bottom: 20px;
 	left: 35%;
 	width: 35%;
 }
-#misc-fifty-percent img {
-	width: 100%;
-	height: auto;
-}
 #misc-twenty-minute {
 	position: absolute;
 	top: 8%;
-	left: 60%;
+	left: 50%;
 	width: 20%;
 }
-#misc-twenty-minute img {
-	width: 100%;
-	height: auto;
+#misc-rush {
+	position: absolute;
+	top: 5%;
+	right: 1%;
+	width: 50%;
+	text-align: right;
+}
+#misc-rush img {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+#misc-rush div {
+	position: absolute;
+	margin-top: 45%;
+	right: 9%;
 }

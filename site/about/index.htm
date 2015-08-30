@@ -13,11 +13,11 @@
 			<h2>The Project</h2>
 			<h4>Data</h4>
 			<p>
-				This site uses data from 100,000 Black Market Brawlers games spread out from the North America, EU Nordic & East, EU West, Latin America North, Latin America South, Oceania, Turkey, Russia, and Korea regions.
-			</p>
+			<img class="img-left" src="../img/database-structure.png">
+			Our detailed reinterpretation of the data structures lead to roughly 32 million rows of data in our database. While this is not necessarily a large amount compared to a corporate database, attempting to insert, interpret, and analyze these 32 million rows on a home PC proved a more difficult task. After quite an amount of both code and database tuning and optimization we managed to get the total insertion time down to roughly 45 minutes for approxamately 38 million rows, all 99,997 matches.  The image shown illustrates the general structure of the database.</p>
 			<p>
 			<img class="img-right" src="../img/heatmap-base.png">
-			This is the base image for the kill heatmap.  This image was then scaled and overlaid onto the Summoner's Rift map.</p>
+			Using the X and Y position for kills, we were able to generate a heatmap for these kills in the open-source program, <a href="http://www.gnuplot.info/">gnuplot</a>.  This image was then overlaid and scaled onto the Summoner's Rift minimap image to show where kills occured the most over the course of this event.  The main challenge here was determining a suitable coloring for the heatmap, but that was a simple fix that just took trial and error of colors. For the final image we applied a few post-processing effects including level adjustments and small blurring.</p>
 
 			<h4>Site</h4>
 			<p>The site uses Highcharts for all graph displays except the curved bars around the champion portrait. JQuery UI was used to make some nice sliders on the first page and the loading coin animation. There were a few large hurdles to cross when developing the site.  The first was having an asynchronous loader for every image + another loader for each champion portrait in the champ select window. The second and third challenges were creating the curved bars on the Champ page and creating the unrolling parchment on the Other Stats page.</p>

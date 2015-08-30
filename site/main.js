@@ -527,44 +527,65 @@ var createMainChart = function() {
 
 	proms.push(loadTimeData());
 	var timeSlots = [
-		"6:50 - 7:00pm",
-		"7:00 - 7:10pm",
-		"7:10 - 7:20pm",
-		"7:20 - 7:30pm",
-		"7:30 - 7:40pm",
-		"7:40 - 7:50pm",
-		"7:50 - 8:00pm",
-		"8:00 - 8:10pm",
-		"8:10 - 8:20pm",
-		"8:20 - 8:30pm",
-		"8:30 - 8:40pm",
-		"8:40 - 8:50pm",
-		"8:50 - 9:00pm",
-		"9:00 - 9:10pm",
-		"9:10 - 9:10pm",
-		"9:20 - 9:30pm",
-		"9:30 - 9:40pm",
-		"9:40 - 9:50pm",
-		"9:50 - 10:00pm",
-		"10:00 - 10:10pm",
-		"10:10 - 10:20pm",
-		"10:20 - 10:30pm",
-		"10:30 - 10:40pm",
-		"10:40 - 10:50pm",
-		"10:50 - 11:00pm",
-		"11:00 - 11:10pm",
-		"11:10 - 11:20pm"];
+		"12:00 - 12:30am",
+		"12:30 - 1:00am",
+		"1:00 - 1:30am",
+		"1:30 - 2:00am",
+		"2:00 - 2:30am",
+		"2:30 - 3:00am",
+		"3:00 - 3:30am",
+		"3:30 - 4:00am",
+		"4:00 - 4:30am",
+		"4:30 - 5:00am",
+		"5:00 - 5:30am",
+		"5:30 - 6:00am",
+		"6:00 - 6:30am",
+		"6:30 - 7:00am",
+		"7:00 - 7:30am",
+		"7:30 - 8:00am",
+		"8:00 - 8:30am",
+		"8:30 - 9:00am",
+		"9:00 - 9:30am",
+		"9:30 - 10:00am",
+		"10:00 - 10:30am",
+		"10:30 - 11:00am",
+		"11:00 - 11:30am",
+		"11:30 - 12:00pm",
+		"12:00 - 12:30pm",
+		"12:30 - 1:00pm",
+		"1:00 - 1:30pm",
+		"1:30 - 2:00pm",
+		"2:00 - 2:30pm",
+		"2:30 - 3:00pm",
+		"3:00 - 3:30pm",
+		"3:30 - 4:00pm",
+		"4:00 - 4:30pm",
+		"4:30 - 5:00pm",
+		"5:00 - 5:30pm",
+		"5:30 - 6:00pm",
+		"6:00 - 6:30pm",
+		"6:30 - 7:00pm",
+		"7:00 - 7:30pm",
+		"7:30 - 8:00pm",
+		"8:00 - 8:30pm",
+		"8:30 - 9:00pm",
+		"9:00 - 9:30pm",
+		"9:30 - 10:00pm",
+		"10:00 - 10:30pm",
+		"10:30 - 11:00pm",
+		"11:00 - 11:30pm",
+		"11:30 - 12:00am"];
 
 	$("#time-slider div").slider({
-		min: 1,
-		max: 25,
-		value: 1,
+		min: 0,
+		max: 47,
+		value: 0,
 		slide: function(event, ui) {
 			$(this).slider('value', ui.value);
 			var oldText = $("#time-slider p").text();
 			var newText = oldText.substr(0, oldText.indexOf("[") + 1);
 			var timeSegment = $("#time-slider div").slider("option", "value");
-			newText += timeSlots[timeSegment] + "] EST";
+			newText += timeSlots[timeSegment] + "] UTC";
 			$("#time-slider p").text(newText);
 
 			if (chartType == chartValue.PICKRATE) {
@@ -646,11 +667,11 @@ var createBrawlersChart = function() {
 	var brawlerData = [{
 		name: "Buy Rate",
 		color: "#FFD900",
-		data: [31.51, 16.04, 11.26, 5.5, 2.72]
+		data: [29.91, 15.64, 11.56, 5.86, 4.25]
 	}, {
 		name: "Win Rate",
 		color: "#0074E8",
-		data: [50.99, 49.96, 50.61, 48.19, 41.57]
+		data: [51.01, 50.35, 50.97, 48.43, 39.67]
 	}];
 
 	$("#brawlers-chart").highcharts({
@@ -1385,8 +1406,9 @@ var createMiscMap = function() {
 	proms.push(loadSource($("#misc-map audio"), "snd/mapunroll.mp3"));
 	proms.push(loadSource($("#misc-scroll-map img"), "img/parchment16x9.jpg"));
 	proms.push(loadSource($("#misc-teemo-killed img"), "img/teemo-killed.png"));
-	proms.push(loadSource($("#misc-fifty-percent img"), "img/50-percent.png"))
-	proms.push(loadSource($("#misc-twenty-minute img"), "img/20-min-surr.png"))
+	proms.push(loadSource($("#misc-fifty-percent img"), "img/50-percent.png"));
+	proms.push(loadSource($("#misc-twenty-minute img"), "img/20-min-surr.png"));
+	proms.push(loadSource($("#misc-rush img"), "img/rush-games-blood.png"));
 
 	return $.when.apply($, proms).then(function() {
 		$("#misc-map-overlay img").attr("src", "img/parchment16x9.jpg");
