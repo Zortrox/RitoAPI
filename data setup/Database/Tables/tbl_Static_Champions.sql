@@ -1,0 +1,15 @@
+CREATE TABLE [dbo].[tbl_Static_Champions](
+	[championId] [int] NOT NULL,
+	[name] [varchar](50) NOT NULL,
+ CONSTRAINT [PK_tbl_Static_Champions] PRIMARY KEY CLUSTERED 
+(
+	[championId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+
