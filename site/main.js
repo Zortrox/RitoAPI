@@ -863,7 +863,8 @@ var loadNewChamp = function(champ) {
 		"http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/" +
 		champStats[currentChampID].bestItem + ".png"));
 	} else {
-		$("#champ-item-desc").html("Gangplank was dead, so he had no favorite item.");
+		$("#champ-item-desc").html("Gangplank was \"dead\", but he used his oranges and it was K (except his arm).");
+		proms.push(loadSource($("#champ-winning-item img"), "img/gp-orange.png"));
 	}
 
 
