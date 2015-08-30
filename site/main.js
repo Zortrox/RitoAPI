@@ -851,8 +851,8 @@ var loadNewChamp = function(champ) {
 
 	//remove and hide previous champ info
 	$("#champ-main-img").hide();
-	$("#champ-name").html("<b>nbsp;</b><br><i>nbsp;</i>");
-	$("#champ-winning-item img").attr("src", "img/item-black.jpg");
+	$("#champ-name").html("<b>&nbsp;</b><br><i>&nbsp;</i>");
+	$("#champ-winning-item img:first-of-type").attr("src", "img/item-black.jpg");
 	if (hasLoadedChamp) { changeChampStats(true); }
 	$("#champ-item-desc").html("");
 
@@ -880,21 +880,19 @@ var loadNewChamp = function(champ) {
 		innerHTML += itemDesc + "<br><br>";
 		innerHTML += "<i class=\"item-text\">" + itemObj.plaintext + "</i>";
 		$("#champ-item-desc").html(innerHTML);
-		proms.push(loadSource($("#champ-winning-item img"),
+		proms.push(loadSource($("#champ-winning-item img:nth-of-type(2)"),
 		"http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/" +
 		champStats[currentChampID].bestItem + ".png"));
-	} else {
-		$("#champ-item-desc").html("Gangplank was \"dead\", but he used his oranges and it was K (except his arm).");
-		proms.push(loadSource($("#champ-winning-item img"), "img/gp-orange.png"));
 	}
-
 
 	return $.when.apply($, proms).then(function() {
 		//add data to page and show
 		if (hasLoadedChamp) { changeChampStats(); }
 		$("#champ-main-img").show();
 		$("#champ-name").html("<b>" + champ.name + "</b><br><i>" + champ.title + "</i>");
-
+		$("#champ-winning-item img:first-of-type").attr("src",
+			"http://ddragon.leagueoflegends.com/cdn/5.14.1/img/item/" +
+			champStats[currentChampID].bestItem + ".png");
 	})
 }
 var changeChampStats = function(removeStats) {
