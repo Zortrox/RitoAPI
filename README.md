@@ -30,7 +30,7 @@ At screen resolutions >= 1366x768 with JavaScript enabled, the site displays pro
 "Much Brawlers" isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing League of Legends. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. League of Legends © Riot Games, Inc.
 
 ## License
-Copyright (c) 2015 Jon Stirling and Matthew Clark
+© Copyright 2015 Jon Stirling and Matthew Clark
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
