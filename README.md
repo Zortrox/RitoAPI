@@ -22,6 +22,7 @@ This site has been tested on:
 - Chrome >= 38
 - Firefox >= 35
 - Opera >= 30
+
 At screen resolutions >= 1366x768 with JavaScript enabled, the site displays properly.  This in no way means other browsers won't work correctly, just that it should work for this software.
 
 
