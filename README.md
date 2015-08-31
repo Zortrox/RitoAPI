@@ -10,7 +10,7 @@ We also calculated the win rate of champions whether they bought the new Black M
 The final page shows some miscellaneous "other" data: a death heatmap, number of twenty-minute surrenders, number of less than 20 minute games, number of total Teemo deaths, and a funny "50% Global Win Rate" (for every win, somebody else loses).
 
 ## [Back-End](data%20setup/)
-Using C# and Microsft SQL Server 2014 Management Studio, we created two programs.  One program downloads all of the match data and the other to organize the data into a database.  From there we could make queries that we then converted into JSON files that the website can easily parse.
+Using C# and Microsft SQL Server 2014 Management Studio, we created two programs.  One program downloads all of the match data and the other organizes the it into a database.  From there we could make queries that we then converted into JSON files that the website can easily parse.
 
 ## [Front-End](site/)
 We used HTML, CSS, and JavaScript to create the website.  We included Highcharts, jQuery, and jQuery UI in order to simplify some chart drawing as well as general JavaScript programming and element animation.  The entire front-end is one singular page that shows and hides elements as the user switches between content.  Statistics are loaded from JSON files that were mentioned previously.
